@@ -1,13 +1,31 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import ModelDropdown from './components/ModelDropdown'
 import ChatInput from './components/ChatInput'
 import MessageList from './components/MessageList'
-import { askQuestion, MODES } from './services/chatService'
+import DocumentsPanel from './components/DocumentsPanel'
+import { askQuestion, listDocuments, MODES } from './services/chatService'
 
 export default function App() {
   const [mode, setMode] = useState('llm_rag')
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(false)
+  const [documents, setDocuments] = useState([])
+  const [panelOpen, setPanelOpen] = useState(false)
+
+  const refreshDocuments = useCallback(async () => {
+    try {
+      const { documents: docs } = await listDocuments()
+      setDocuments(docs)
+    } catch {
+      setDocuments([]) // backend not reachable yet; the chat call will surface the error
+    }
+  }, [])
+
+  useEffect(() => {
+    // Load the document list once on mount; state updates happen after the fetch resolves.
+    // eslint-disable-next-line react/set-state-in-effect
+    refreshDocuments()
+  }, [refreshDocuments])
 
   const handleSubmit = async (question) => {
     const modeLabel = MODES.find((m) => m.id === mode)?.label
@@ -48,6 +66,14 @@ export default function App() {
                 New chat
               </button>
             )}
+            <button type="button" className="ghost-btn docs-btn" onClick={() => setPanelOpen(true)}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <path d="M14 2v6h6" />
+              </svg>
+              Docs
+              {documents.length > 0 && <span className="badge">{documents.length}</span>}
+            </button>
             <ModelDropdown value={mode} onChange={setMode} />
           </div>
         </header>
@@ -72,6 +98,13 @@ export default function App() {
           </section>
         )}
       </main>
+
+      <DocumentsPanel
+        open={panelOpen}
+        onClose={() => setPanelOpen(false)}
+        documents={documents}
+        onRefresh={refreshDocuments}
+      />
     </div>
   )
 }

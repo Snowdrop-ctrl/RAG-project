@@ -17,8 +17,11 @@ export default function MessageList({ messages, loading }) {
             <p>{msg.content}</p>
             {msg.sources?.length > 0 && (
               <div className="sources">
-                {msg.sources.map((s) => (
-                  <span key={s} className="source-chip">{s}</span>
+                {msg.sources.map((s, i) => (
+                  <span key={`${s.source}-${s.page ?? i}`} className="source-chip" title={`Relevance ${Math.round(s.score * 100)}%`}>
+                    <span className="source-index">{i + 1}</span>
+                    {s.label}
+                  </span>
                 ))}
               </div>
             )}

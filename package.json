@@ -12,7 +12,10 @@
     "dev:backend": "cd backend && uv run uvicorn app.main:app --reload --port 8000",
     "build": "npm run build -w @rag/frontend",
     "lint": "npm run lint -w @rag/frontend && cd backend && uv run ruff check .",
-    "test": "cd backend && uv run pytest"
+    "test": "cd backend && uv run pytest",
+    "ingest": "cd backend && uv run python -m app.cli ingest",
+    "docs:list": "cd backend && uv run python -m app.cli list",
+    "docs:clear": "cd backend && uv run python -m app.cli clear"
   },
   "devDependencies": {
     "concurrently": "^9.1.0"

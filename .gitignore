@@ -22,3 +22,6 @@ __pycache__/
 !.vscode/extensions.json
 .idea/
 .DS_Store
+
+# Vector index (rebuildable from documents)
+backend/data/chroma/
