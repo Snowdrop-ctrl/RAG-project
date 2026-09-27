@@ -6,7 +6,8 @@ BACKEND_DIR = Path(__file__).resolve().parent.parent
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # Absolute path so the file is found no matter which directory the server starts from.
+    model_config = SettingsConfigDict(env_file=BACKEND_DIR / ".env", extra="ignore")
 
     cors_origins: str = "http://localhost:5173"
 
@@ -24,7 +25,7 @@ class Settings(BaseSettings):
     chunk_words: int = 200
     chunk_overlap_words: int = 40
     top_k: int = 4
-    min_score: float = 0.25
+    min_score: float = 0.35
 
     @property
     def cors_origin_list(self) -> list[str]:

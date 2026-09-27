@@ -1,8 +1,13 @@
+import asyncio
+import io
+
+import docx
 import pytest
 from fastapi.testclient import TestClient
+from reportlab.pdfgen import canvas
 
 from app.main import app
-from app.services import ingest, vector_store
+from app.services import ingest, rag, vector_store
 
 client = TestClient(app)
 
@@ -65,3 +70,50 @@ def test_upload_rejects_empty_file(clean_index):
 
 def test_delete_unknown_document_returns_404(clean_index):
     assert client.delete("/api/documents/nope.txt").status_code == 404
+
+
+def _make_pdf(pages: list[str]) -> bytes:
+    """Build a small multi-page PDF in memory for the extraction tests."""
+    buf = io.BytesIO()
+    pdf = canvas.Canvas(buf)
+    for text in pages:
+        pdf.drawString(72, 720, text)
+        pdf.showPage()
+    pdf.save()
+    return buf.getvalue()
+
+
+def _make_docx(paragraphs: list[str]) -> bytes:
+    document = docx.Document()
+    for p in paragraphs:
+        document.add_paragraph(p)
+    buf = io.BytesIO()
+    document.save(buf)
+    return buf.getvalue()
+
+
+def test_pdf_extraction_keeps_page_numbers():
+    blocks = ingest.extract_blocks(_make_pdf(["First page text", "Second page text"]), "report.pdf")
+    assert [b.page for b in blocks] == [1, 2]
+    assert "Second page text" in blocks[1].text
+
+
+def test_pdf_upload_reports_page_in_source_label(clean_index):
+    pdf = _make_pdf(["Nothing here.", "The Orion engine delivers 92 kilonewtons of thrust."])
+    assert client.post("/api/documents", files={"file": ("engine.pdf", pdf, "application/pdf")}).status_code == 201
+
+    hits = asyncio.run(rag.retrieve("How much thrust does the Orion engine make?"))
+    assert hits, "expected the PDF chunk to be retrieved"
+    assert hits[0].source == "engine.pdf"
+    assert hits[0].page == 2
+    assert hits[0].label == "engine.pdf (p. 2)"
+
+
+def test_docx_extraction(clean_index):
+    data = _make_docx(["Quarterly revenue grew to 4.2 million euros.", "Headcount reached 58."])
+    res = client.post(
+        "/api/documents",
+        files={"file": ("q3.docx", data, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
+    )
+    assert res.status_code == 201
+    assert res.json()["chunks"] >= 1
