@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="What RAG is, the problems it solves, and how our app answers a question - traced through the real endpoints, files and settings.">
+<meta name="description" content="What RAG is, the problems it solves, and how our app answers a question, in diagrams.">
 <style>
   :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   body { margin: 0; font-family: system-ui, sans-serif; font-size: 14px; }
@@ -815,20 +815,6 @@ A: The context passages do not contain the answer to that question.
 
     <div class="table-wrap">
       <table>
-        <caption>The API</caption>
-        <thead><tr><th>Endpoint</th><th>What it does</th></tr></thead>
-        <tbody>
-          <tr><td><code>POST /api/chat</code></td><td>Answer a question in <code>llm</code> or <code>llm_rag</code> mode</td></tr>
-          <tr><td><code>POST /api/documents</code></td><td>Upload and index one file, max 20 MB</td></tr>
-          <tr><td><code>GET /api/documents</code></td><td>List indexed files and their chunk counts</td></tr>
-          <tr><td><code>DELETE /api/documents/{name}</code></td><td>Remove a file's chunks from the index</td></tr>
-          <tr><td><code>GET /api/health</code></td><td>Status, whether a key is set, number of chunks indexed</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="table-wrap">
-      <table>
         <caption>The numbers in app/config.py</caption>
         <thead><tr><th>Setting</th><th>Value</th><th>What it controls</th></tr></thead>
         <tbody>
@@ -842,22 +828,6 @@ A: The context passages do not contain the answer to that question.
       </table>
     </div>
 
-    <div class="table-wrap">
-      <table>
-        <caption>Which file does what</caption>
-        <thead><tr><th>File</th><th>Role</th></tr></thead>
-        <tbody>
-          <tr><td><code>app/api/chat.py</code></td><td>Chooses the path for each mode, maps errors to status codes</td></tr>
-          <tr><td><code>app/api/documents.py</code></td><td>Upload, list and delete documents</td></tr>
-          <tr><td><code>app/services/ingest.py</code></td><td>Extract text, chunk it, store it</td></tr>
-          <tr><td><code>app/services/embeddings.py</code></td><td>Turns text into vectors, locally</td></tr>
-          <tr><td><code>app/services/vector_store.py</code></td><td>ChromaDB wrapper: add, search, delete</td></tr>
-          <tr><td><code>app/services/rag.py</code></td><td>Retrieval, and the <code>min_score</code> filter</td></tr>
-          <tr><td><code>app/services/llm.py</code></td><td>Prompts and the DeepSeek call</td></tr>
-          <tr><td><code>src/services/chatService.js</code></td><td>Every call the frontend makes</td></tr>
-        </tbody>
-      </table>
-    </div>
   </section>
 
   <!-- ===== 5 ===== -->
