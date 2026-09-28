@@ -214,6 +214,11 @@
   }
 
   pre code { padding: 0; background: none; border: 0; font-size: 1em; color: inherit; }
+
+  pre.flow { line-height: 1.5; font-size: 0.82rem; }
+  pre.flow .s { color: #6ed7e3; font-weight: 500; }
+  pre.flow .a { color: #7f96a6; }
+  pre.flow .n { color: #f0b071; }
   pre .c { color: #7f96a6; }
   pre .k { color: #6ed7e3; }
   pre .v { color: #f0b071; }
@@ -496,6 +501,23 @@ POST /api/chat
       end up with similar numbers, which is what makes search by meaning possible.
     </p>
 
+
+    <h3 class="sub">The upload pipeline at a glance</h3>
+<pre class="flow"><code><span class="s">Upload document</span>  (PDF · DOCX · TXT · MD)   <span class="a">POST /api/documents</span>
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">1. Extract text</span>        <span class="a">→</span> pypdf / python-docx; page numbers kept
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">2. Chunk</span>               <span class="a">→</span> slices of <span class="n">200 words</span>, each repeating the
+      <span class="a">│</span>                  last <span class="n">40 words</span> of the slice before it
+      <span class="a">▼</span>
+<span class="s">3. Embed</span>               <span class="a">→</span> fastembed turns each chunk into a vector
+      <span class="a">│</span>                  of <span class="n">384 numbers</span>, on this machine
+      <span class="a">▼</span>
+<span class="s">4. Store in ChromaDB</span>   <span class="a">→</span> vector + chunk text + source file + page
+                         saved under backend/data/chroma</code></pre>
+
     <figure>
       <div class="scroller">
         <svg viewBox="0 0 840 330" role="img" aria-label="Upload pipeline: POST slash api slash documents calls extract_blocks, then chunk_text with 200 words and 40 overlap, then embed_documents using fastembed to make 384-number vectors, then add_chunks which writes to ChromaDB on disk. Below, the shape of one stored record.">
@@ -587,6 +609,26 @@ npm run ingest
     <p class="lede">
       Five hops, about two seconds. The only step that touches the internet is the last one.
     </p>
+
+
+    <h3 class="sub">The question pipeline at a glance</h3>
+<pre class="flow"><code><span class="s">User presses ↑</span>  in ChatInput.jsx
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">1. POST /api/chat</span>      <span class="a">→</span> { question, mode: "llm_rag" } via the Vite proxy
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">2. rag.retrieve()</span>      <span class="a">→</span> embed the question with the same model
+      <span class="a">│</span>                  search ChromaDB, keep the closest <span class="n">top_k = 4</span>
+      <span class="a">│</span>                  drop anything under <span class="n">min_score = 0.35</span>
+      <span class="a">▼</span>
+<span class="s">3. llm.py</span>              <span class="a">→</span> builds one prompt: rules + [1]…[4] + question
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">4. DeepSeek API</span>        <span class="a">→</span> writes the answer and cites [n]   <span class="a">(HTTPS)</span>
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">5. { answer, sources }</span> <span class="a">→</span> chat bubble + source chips in MessageList.jsx</code></pre>
 
     <figure>
       <div class="scroller">
