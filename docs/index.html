@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="How our RAG app answers a question, traced through the real endpoints, files and settings in this repo.">
+<meta name="description" content="What RAG is, the problems it solves, and how our app answers a question - traced through the real endpoints, files and settings.">
 <style>
   :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   body { margin: 0; font-family: system-ui, sans-serif; font-size: 14px; }
   img { max-width: 100%; }
   [hidden] { display: none !important; }
 </style>
-<title>RAG in 30 Minutes</title>
+<title>How Our RAG App Works</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
@@ -87,11 +87,6 @@
   }
 
   .masthead {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: flex-end;
-    justify-content: space-between;
-    gap: 18px;
     padding-bottom: 20px;
     border-bottom: 2px solid var(--ink);
   }
@@ -116,28 +111,14 @@
 
   .standfirst {
     margin: 14px 0 0;
-    max-width: 58ch;
+    max-width: 60ch;
     color: var(--muted);
     font-size: 1.05rem;
   }
 
-  .clock {
-    flex-shrink: 0;
-    padding: 10px 16px;
-    border: 1px solid var(--line-strong);
-    border-radius: 4px;
-    background: var(--surface);
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    text-align: right;
-    color: var(--muted);
-  }
-
-  .clock b { display: block; color: var(--ink); font-size: 1.45rem; font-weight: 600; }
-
-  .agenda {
+  .contents {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1px;
     margin: 26px 0 0;
     padding: 0;
@@ -146,10 +127,9 @@
     border: 1px solid var(--line);
   }
 
-  .agenda li { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; background: var(--surface); }
-  .agenda .num { font-family: var(--mono); font-size: 0.7rem; color: var(--local); }
-  .agenda .what { font-weight: 600; font-size: 0.92rem; line-height: 1.25; }
-  .agenda .mins { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
+  .contents li { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; background: var(--surface); }
+  .contents .num { font-family: var(--mono); font-size: 0.7rem; color: var(--local); }
+  .contents .what { font-weight: 600; font-size: 0.92rem; line-height: 1.25; }
 
   section { margin-top: 56px; }
 
@@ -169,14 +149,6 @@
     font-weight: 600;
     letter-spacing: -0.02em;
     text-wrap: balance;
-  }
-
-  .sec-head .mins {
-    margin-left: auto;
-    font-family: var(--mono);
-    font-size: 0.75rem;
-    color: var(--muted);
-    white-space: nowrap;
   }
 
   .lede { margin: 16px 0 0; max-width: 64ch; font-size: 1.02rem; }
@@ -214,14 +186,14 @@
   }
 
   pre code { padding: 0; background: none; border: 0; font-size: 1em; color: inherit; }
+  pre .c { color: #7f96a6; }
+  pre .k { color: #6ed7e3; }
+  pre .v { color: #f0b071; }
 
   pre.flow { line-height: 1.5; font-size: 0.82rem; }
   pre.flow .s { color: #6ed7e3; font-weight: 500; }
   pre.flow .a { color: #7f96a6; }
   pre.flow .n { color: #f0b071; }
-  pre .c { color: #7f96a6; }
-  pre .k { color: #6ed7e3; }
-  pre .v { color: #f0b071; }
 
   figure {
     margin: 22px 0 0;
@@ -325,6 +297,18 @@
   td:first-child code { white-space: nowrap; }
   tr:last-child td { border-bottom: 0; }
 
+  .where {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    white-space: nowrap;
+  }
+
+  .where.local { background: var(--local-soft); color: var(--local); }
+  .where.net { background: var(--net-soft); color: var(--net); }
+
   .checks { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 
   .checks li {
@@ -358,10 +342,6 @@
     margin-top: 56px;
     padding-top: 16px;
     border-top: 2px solid var(--ink);
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-    justify-content: space-between;
     font-family: var(--mono);
     font-size: 0.76rem;
     color: var(--muted);
@@ -380,41 +360,38 @@
 <div class="wrap">
 
   <header class="masthead">
-    <div>
-      <p class="kicker">Team session · our RAG app, start to finish</p>
-      <h1>RAG in 30 Minutes</h1>
-      <p class="standfirst">
-        What happens between pressing send and seeing an answer — traced through the real
-        endpoints, files and functions in this repo.
-      </p>
-    </div>
-    <div class="clock"><b>30</b>minutes<br>5 diagrams</div>
+    <p class="kicker">Project documentation</p>
+    <h1>How Our RAG App Works</h1>
+    <p class="standfirst">
+      What happens between pressing send and seeing an answer — traced through the real endpoints,
+      files and settings in this repo.
+    </p>
   </header>
 
-  <ol class="agenda">
-    <li><span class="num">01</span><span class="what">The problem &amp; the two modes</span><span class="mins">4 min</span></li>
-    <li><span class="num">02</span><span class="what">Uploading a document</span><span class="mins">7 min</span></li>
-    <li><span class="num">03</span><span class="what">Asking a question</span><span class="mins">8 min</span></li>
-    <li><span class="num">04</span><span class="what">The prompt we send</span><span class="mins">5 min</span></li>
-    <li><span class="num">05</span><span class="what">What leaves the machine</span><span class="mins">6 min</span></li>
+  <ol class="contents">
+    <li><span class="num">01</span><span class="what">What is RAG</span></li>
+    <li><span class="num">02</span><span class="what">The problem it solves</span></li>
+    <li><span class="num">03</span><span class="what">Question flow</span></li>
+    <li><span class="num">04</span><span class="what">Implementation flow</span></li>
+    <li><span class="num">05</span><span class="what">Tech &amp; services</span></li>
+    <li><span class="num">06</span><span class="what">Security</span></li>
   </ol>
 
   <!-- ===== 1 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">01</span>
-      <h2>Why we need RAG, and the two modes</h2>
-      <span class="mins">4 min</span>
+      <h2>What is RAG</h2>
     </div>
     <p class="lede">
-      DeepSeek has never seen our documents. Ask it about our leave policy and it answers from its
-      training data — confidently, and often wrongly. <b>RAG</b> means: find the relevant text in our own
-      files first, put that text in the prompt, and let the model answer from it.
+      <b>RAG</b> stands for Retrieval-Augmented Generation. It means: <b>retrieve</b> the relevant text
+      from our own documents first, then let the model <b>generate</b> an answer from that text instead
+      of from its training data.
     </p>
     <p class="lede">
-      Our app has both, chosen by the dropdown. Both hit the same endpoint,
-      <code>POST /api/chat</code>, with a different <code>mode</code>. The branch is four lines in
-      <code>app/api/chat.py</code>.
+      Nothing is retrained. The model is the same DeepSeek model either way — we simply change what sits
+      next to the question in the prompt. Our app exposes both paths through one endpoint,
+      <code>POST /api/chat</code>, switched by the <code>mode</code> field.
     </p>
 
     <figure>
@@ -478,29 +455,273 @@
       </figcaption>
     </figure>
 
-    <h3 class="sub">The request our frontend sends</h3>
-<pre><code><span class="c">// frontend/src/services/chatService.js</span>
-POST /api/chat
-{ <span class="k">"question"</span>: <span class="v">"How many vacation days do I get?"</span>,
-  <span class="k">"mode"</span>:     <span class="v">"llm_rag"</span> }</code></pre>
+    <div class="table-wrap">
+      <table>
+        <caption>The four words that carry the whole idea</caption>
+        <thead><tr><th>Term</th><th>What it means here</th></tr></thead>
+        <tbody>
+          <tr><td><b>Chunk</b></td><td>A slice of a document. Ours are 200 words long</td></tr>
+          <tr><td><b>Embedding</b></td><td>A chunk turned into 384 numbers that represent its meaning</td></tr>
+          <tr><td><b>Vector database</b></td><td>Where those numbers live, so we can search by meaning. We use ChromaDB</td></tr>
+          <tr><td><b>Retrieval</b></td><td>Finding the chunks closest in meaning to the question</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- ===== 2 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">02</span>
-      <h2>Uploading a document: chunking and embedding</h2>
-      <span class="mins">7 min</span>
+      <h2>What problem RAG solves</h2>
     </div>
     <p class="lede">
-      This runs once per file, when someone uploads it in the Docs panel. Two words to get straight:
-    </p>
-    <p class="lede">
-      A <b>chunk</b> is a slice of the document — ours are 200 words long. An <b>embedding</b> is that
-      chunk turned into a list of 384 numbers that represents its meaning. Chunks about the same subject
-      end up with similar numbers, which is what makes search by meaning possible.
+      A language model has one source of knowledge: whatever it read during training. That creates four
+      problems the moment you ask it about your own company.
     </p>
 
+    <div class="table-wrap">
+      <table>
+        <caption>Four problems, and what changes with RAG</caption>
+        <thead><tr><th>Problem</th><th>Plain LLM</th><th>With RAG</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>It invents answers</b></td>
+            <td>Produces something fluent and plausible when it does not know</td>
+            <td>The prompt says to use only the retrieved passages and to say so when they don't cover it</td>
+          </tr>
+          <tr>
+            <td><b>It never saw our files</b></td>
+            <td>Our handbook, specs and contracts were never in its training data</td>
+            <td>Those files are indexed locally and searched at question time</td>
+          </tr>
+          <tr>
+            <td><b>Training data goes stale</b></td>
+            <td>Frozen at the training cut-off; a new policy is invisible to it</td>
+            <td>Re-upload the document and the next answer already reflects it</td>
+          </tr>
+          <tr>
+            <td><b>No way to verify</b></td>
+            <td>An answer arrives with no source to check</td>
+            <td>Every answer carries the file name and page it came from</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3 class="sub">Both behaviours, measured on this build</h3>
+<pre><code><span class="c"># the answer is in the indexed handbook</span>
+Q: How many vacation days do I get?
+A: You get 24 days of paid annual leave per calendar year, and unused
+   leave can be carried over up to a maximum of 5 days [1].
+   <span class="c">→ matched a passage that never says "vacation" (score 0.59)</span>
+
+<span class="c"># the answer is in no indexed document</span>
+Q: What is the capital of Brazil?
+A: The context passages do not contain the answer to that question.
+   <span class="c">→ refused instead of answering from training data</span></code></pre>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Worth using RAG for</h3>
+        <ul>
+          <li>Facts that change: policies, specs, tickets</li>
+          <li>Answers that must cite a source</li>
+          <li>Private documents the model never saw</li>
+        </ul>
+      </div>
+      <div class="card warn">
+        <h3>RAG will not fix</h3>
+        <ul>
+          <li>Tone and formatting — that is prompting or fine-tuning</li>
+          <li>Reasoning the model cannot do anyway</li>
+          <li>Questions whose answer is in no document</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 3 ===== -->
+  <section>
+    <div class="sec-head">
+      <span class="idx">03</span>
+      <h2>RAG and the LLM: what happens when we ask a question</h2>
+    </div>
+    <p class="lede">
+      Five hops, about two seconds. Only the last one touches the internet.
+    </p>
+
+    <h3 class="sub">The question pipeline at a glance</h3>
+<pre class="flow"><code><span class="s">User presses ↑</span>  in ChatInput.jsx
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">1. POST /api/chat</span>      <span class="a">→</span> { question, mode: "llm_rag" } via the Vite proxy
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">2. rag.retrieve()</span>      <span class="a">→</span> embed the question with the same model
+      <span class="a">│</span>                  search ChromaDB, keep the closest <span class="n">top_k = 4</span>
+      <span class="a">│</span>                  drop anything under <span class="n">min_score = 0.35</span>
+      <span class="a">▼</span>
+<span class="s">3. llm.py</span>              <span class="a">→</span> builds one prompt: rules + [1]…[4] + question
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">4. DeepSeek API</span>        <span class="a">→</span> writes the answer and cites [n]   <span class="a">(HTTPS)</span>
+      <span class="a">│</span>
+      <span class="a">▼</span>
+<span class="s">5. { answer, sources }</span> <span class="a">→</span> chat bubble + source chips in MessageList.jsx</code></pre>
+
+    <figure>
+      <div class="scroller">
+        <svg viewBox="0 0 840 300" role="img" aria-label="The question goes from ChatInput.jsx to chat.py on FastAPI, to rag.retrieve which embeds the question and searches ChromaDB, to llm.py which builds the prompt and calls the DeepSeek API, and the JSON response returns to the browser.">
+          <defs>
+            <marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <rect class="svg-box" x="8" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="81" y="88" text-anchor="middle">ChatInput</text>
+          <text class="svg-s" x="81" y="108" text-anchor="middle">user presses ↑</text>
+          <text class="svg-m" x="81" y="126" text-anchor="middle">browser</text>
+
+          <rect class="svg-box" x="178" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="251" y="88" text-anchor="middle">chat.py</text>
+          <text class="svg-s" x="251" y="108" text-anchor="middle">checks the mode</text>
+          <text class="svg-m" x="251" y="126" text-anchor="middle">FastAPI :8000</text>
+
+          <rect class="svg-box-local" x="348" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="421" y="88" text-anchor="middle">rag.retrieve()</text>
+          <text class="svg-s" x="421" y="108" text-anchor="middle">embed + search</text>
+          <text class="svg-m" x="421" y="126" text-anchor="middle">ChromaDB</text>
+
+          <rect class="svg-box" x="518" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="591" y="88" text-anchor="middle">llm.py</text>
+          <text class="svg-s" x="591" y="108" text-anchor="middle">builds the prompt</text>
+          <text class="svg-m" x="591" y="126" text-anchor="middle">httpx</text>
+
+          <rect class="svg-box-net" x="688" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="761" y="88" text-anchor="middle">DeepSeek</text>
+          <text class="svg-s" x="761" y="108" text-anchor="middle">writes the answer</text>
+          <text class="svg-m" x="761" y="126" text-anchor="middle">over HTTPS</text>
+
+          <g color="var(--line-strong)">
+            <line class="edge" x1="158" y1="99" x2="172" y2="99" marker-end="url(#m3)"/>
+            <line class="edge" x1="328" y1="99" x2="342" y2="99" marker-end="url(#m3)"/>
+            <line class="edge" x1="498" y1="99" x2="512" y2="99" marker-end="url(#m3)"/>
+          </g>
+          <g color="var(--net)">
+            <line class="edge-net" x1="668" y1="99" x2="682" y2="99" marker-end="url(#m3)"/>
+          </g>
+
+          <text class="svg-m" x="81" y="46" text-anchor="middle">question</text>
+          <text class="svg-m" x="251" y="46" text-anchor="middle">mode: llm_rag</text>
+          <text class="svg-m" x="421" y="46" text-anchor="middle">4 chunks</text>
+          <text class="svg-m" x="591" y="46" text-anchor="middle">prompt</text>
+
+          <path class="edge" d="M761 142 V186 H81 V142" marker-end="url(#m3)" color="var(--line-strong)"/>
+          <text class="svg-m" x="421" y="178" text-anchor="middle">{ answer, sources } — rendered as the bubble and its source chips</text>
+
+          <text class="svg-lbl" x="8" y="226">INSIDE rag.retrieve()</text>
+          <text class="svg-s" x="8" y="252">1 · embed_query() turns the question into 384 numbers, with the same model used at upload.</text>
+          <text class="svg-s" x="8" y="274">2 · ChromaDB compares it to every stored vector and returns the closest top_k = 4.</text>
+          <text class="svg-s" x="8" y="296">3 · Anything scoring below min_score = 0.35 is dropped before the prompt is built.</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>Measured on our build.</b> “How many vacation days do I get?” scored <code>0.59</code> against a
+        passage reading “24 days of paid annual leave” — no shared keywords. That is meaning-based search
+        doing its job.
+      </figcaption>
+    </figure>
+
+    <h3 class="sub">The prompt, and where the citations come from</h3>
+    <p class="lede">
+      <code>llm.py</code> builds one message: the rules, the retrieved chunks numbered
+      <code>[1]</code>…<code>[4]</code>, then the question. The <code>[2]</code> the model writes in its
+      answer is the same <code>[2]</code> we handed it — that is the entire citation mechanism.
+    </p>
+
+    <figure>
+      <div class="scroller">
+        <svg viewBox="0 0 840 318" role="img" aria-label="The prompt has three parts: the system rules, the numbered chunks with their source and page, and the question. DeepSeek returns an answer containing bracket numbers, which the API turns into a sources array for the UI.">
+          <defs>
+            <marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <text class="svg-lbl" x="30" y="22">WHAT llm.py SENDS</text>
+          <rect x="30" y="34" width="370" height="266" rx="8" fill="var(--surface-2)" stroke="var(--line)"/>
+
+          <rect class="svg-box" x="46" y="50" width="338" height="66" rx="5"/>
+          <text class="svg-m" x="60" y="70">system</text>
+          <text class="svg-s" x="60" y="90">Answer using ONLY the passages below.</text>
+          <text class="svg-s" x="60" y="108">If they don't contain it, say so. Cite [n].</text>
+
+          <rect class="svg-box-local" x="46" y="126" width="338" height="54" rx="5"/>
+          <text class="svg-code" x="60" y="148">[1]</text>
+          <text class="svg-s" x="92" y="148">The Orion engine delivers 92 kN…</text>
+          <text class="svg-m" x="92" y="168">chunk from orion.pdf, page 2</text>
+
+          <rect class="svg-box-local" x="46" y="190" width="338" height="54" rx="5"/>
+          <text class="svg-code" x="60" y="212">[2]</text>
+          <text class="svg-s" x="92" y="212">First flight is scheduled for Nov 2027…</text>
+          <text class="svg-m" x="92" y="232">chunk from orion.pdf, page 3</text>
+
+          <rect class="svg-box" x="46" y="254" width="338" height="34" rx="5"/>
+          <text class="svg-m" x="60" y="276">user</text>
+          <text class="svg-s" x="112" y="276">When is the first flight?</text>
+
+          <g color="var(--net)">
+            <line class="edge-net" x1="406" y1="110" x2="466" y2="110" marker-end="url(#m4)"/>
+          </g>
+          <text class="svg-m" x="436" y="100" text-anchor="middle">HTTPS</text>
+
+          <rect class="svg-box-net" x="472" y="82" width="160" height="56" rx="6"/>
+          <text class="svg-code" x="552" y="108" text-anchor="middle">deepseek-chat</text>
+          <text class="svg-s" x="552" y="126" text-anchor="middle">api.deepseek.com</text>
+
+          <g color="var(--line-strong)">
+            <line class="edge" x1="638" y1="110" x2="666" y2="110" marker-end="url(#m4)"/>
+          </g>
+
+          <rect class="svg-box-local" x="672" y="82" width="150" height="56" rx="6"/>
+          <text class="svg-t" x="747" y="108" text-anchor="middle">answer</text>
+          <text class="svg-s" x="747" y="126" text-anchor="middle">“…Nov 2027 [2]”</text>
+
+          <text class="svg-lbl" x="472" y="178">HOW THE CHIPS APPEAR</text>
+          <text class="svg-s" x="472" y="204">chat.py returns the chunks it used</text>
+          <text class="svg-s" x="472" y="226">as a sources array, each with its</text>
+          <text class="svg-s" x="472" y="248">file name, page and score.</text>
+          <text class="svg-s" x="472" y="280">MessageList.jsx renders those as</text>
+          <text class="svg-s" x="472" y="302">the chips under the bubble.</text>
+        </svg>
+      </div>
+      <figcaption>
+        <b>The refusal is tested.</b> With only the handbook indexed we asked for the capital of Brazil;
+        the reply said the passages do not cover it instead of answering from training. That behaviour
+        comes from the system prompt, not from luck.
+      </figcaption>
+    </figure>
+
+    <h3 class="sub">The real response, copied from a live run</h3>
+<pre><code>{ <span class="k">"answer"</span>: <span class="v">"You get 24 days of paid annual leave per calendar year,
+              and unused leave can be carried over up to 5 days [1]."</span>,
+  <span class="k">"sources"</span>: [ { <span class="k">"label"</span>: <span class="v">"company-handbook.md"</span>,
+                 <span class="k">"page"</span>:  <span class="v">null</span>,
+                 <span class="k">"score"</span>: <span class="v">0.568</span> } ] }</code></pre>
+  </section>
+
+  <!-- ===== 4 ===== -->
+  <section>
+    <div class="sec-head">
+      <span class="idx">04</span>
+      <h2>Implementation flow: getting documents in</h2>
+    </div>
+    <p class="lede">
+      Before any question can be answered, documents have to be indexed. This runs once per file, when
+      someone uploads it in the Docs panel or runs <code>npm run ingest</code>.
+    </p>
 
     <h3 class="sub">The upload pipeline at a glance</h3>
 <pre class="flow"><code><span class="s">Upload document</span>  (PDF · DOCX · TXT · MD)   <span class="a">POST /api/documents</span>
@@ -592,107 +813,19 @@ POST /api/chat
       </figcaption>
     </figure>
 
-    <h3 class="sub">Doing it from the terminal instead of the UI</h3>
-<pre><code><span class="c"># put files in backend/data/docs/ then:</span>
-npm run ingest
-  company-handbook.md: 1 chunks
-  Indexed 1 file(s); 1 chunks total.</code></pre>
-  </section>
-
-  <!-- ===== 3 ===== -->
-  <section>
-    <div class="sec-head">
-      <span class="idx">03</span>
-      <h2>Asking a question: the full path</h2>
-      <span class="mins">8 min</span>
+    <div class="table-wrap">
+      <table>
+        <caption>The API</caption>
+        <thead><tr><th>Endpoint</th><th>What it does</th></tr></thead>
+        <tbody>
+          <tr><td><code>POST /api/chat</code></td><td>Answer a question in <code>llm</code> or <code>llm_rag</code> mode</td></tr>
+          <tr><td><code>POST /api/documents</code></td><td>Upload and index one file, max 20 MB</td></tr>
+          <tr><td><code>GET /api/documents</code></td><td>List indexed files and their chunk counts</td></tr>
+          <tr><td><code>DELETE /api/documents/{name}</code></td><td>Remove a file's chunks from the index</td></tr>
+          <tr><td><code>GET /api/health</code></td><td>Status, whether a key is set, number of chunks indexed</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p class="lede">
-      Five hops, about two seconds. The only step that touches the internet is the last one.
-    </p>
-
-
-    <h3 class="sub">The question pipeline at a glance</h3>
-<pre class="flow"><code><span class="s">User presses ↑</span>  in ChatInput.jsx
-      <span class="a">│</span>
-      <span class="a">▼</span>
-<span class="s">1. POST /api/chat</span>      <span class="a">→</span> { question, mode: "llm_rag" } via the Vite proxy
-      <span class="a">│</span>
-      <span class="a">▼</span>
-<span class="s">2. rag.retrieve()</span>      <span class="a">→</span> embed the question with the same model
-      <span class="a">│</span>                  search ChromaDB, keep the closest <span class="n">top_k = 4</span>
-      <span class="a">│</span>                  drop anything under <span class="n">min_score = 0.35</span>
-      <span class="a">▼</span>
-<span class="s">3. llm.py</span>              <span class="a">→</span> builds one prompt: rules + [1]…[4] + question
-      <span class="a">│</span>
-      <span class="a">▼</span>
-<span class="s">4. DeepSeek API</span>        <span class="a">→</span> writes the answer and cites [n]   <span class="a">(HTTPS)</span>
-      <span class="a">│</span>
-      <span class="a">▼</span>
-<span class="s">5. { answer, sources }</span> <span class="a">→</span> chat bubble + source chips in MessageList.jsx</code></pre>
-
-    <figure>
-      <div class="scroller">
-        <svg viewBox="0 0 840 300" role="img" aria-label="The question goes from ChatInput.jsx to POST slash api slash chat, to rag.retrieve which embeds the question and searches ChromaDB, to llm.py which builds the prompt and calls the DeepSeek API, and the JSON response returns to the browser.">
-          <defs>
-            <marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
-            </marker>
-          </defs>
-
-          <rect class="svg-box" x="8" y="60" width="146" height="78" rx="6"/>
-          <text class="svg-code" x="81" y="88" text-anchor="middle">ChatInput</text>
-          <text class="svg-s" x="81" y="108" text-anchor="middle">user presses ↑</text>
-          <text class="svg-m" x="81" y="126" text-anchor="middle">browser</text>
-
-          <rect class="svg-box" x="178" y="60" width="146" height="78" rx="6"/>
-          <text class="svg-code" x="251" y="88" text-anchor="middle">chat.py</text>
-          <text class="svg-s" x="251" y="108" text-anchor="middle">checks the mode</text>
-          <text class="svg-m" x="251" y="126" text-anchor="middle">FastAPI :8000</text>
-
-          <rect class="svg-box-local" x="348" y="60" width="146" height="78" rx="6"/>
-          <text class="svg-code" x="421" y="88" text-anchor="middle">rag.retrieve()</text>
-          <text class="svg-s" x="421" y="108" text-anchor="middle">embed + search</text>
-          <text class="svg-m" x="421" y="126" text-anchor="middle">ChromaDB</text>
-
-          <rect class="svg-box" x="518" y="60" width="146" height="78" rx="6"/>
-          <text class="svg-code" x="591" y="88" text-anchor="middle">llm.py</text>
-          <text class="svg-s" x="591" y="108" text-anchor="middle">builds the prompt</text>
-          <text class="svg-m" x="591" y="126" text-anchor="middle">httpx</text>
-
-          <rect class="svg-box-net" x="688" y="60" width="146" height="78" rx="6"/>
-          <text class="svg-code" x="761" y="88" text-anchor="middle">DeepSeek</text>
-          <text class="svg-s" x="761" y="108" text-anchor="middle">writes the answer</text>
-          <text class="svg-m" x="761" y="126" text-anchor="middle">over HTTPS</text>
-
-          <g color="var(--line-strong)">
-            <line class="edge" x1="158" y1="99" x2="172" y2="99" marker-end="url(#m3)"/>
-            <line class="edge" x1="328" y1="99" x2="342" y2="99" marker-end="url(#m3)"/>
-            <line class="edge" x1="498" y1="99" x2="512" y2="99" marker-end="url(#m3)"/>
-          </g>
-          <g color="var(--net)">
-            <line class="edge-net" x1="668" y1="99" x2="682" y2="99" marker-end="url(#m3)"/>
-          </g>
-
-          <text class="svg-m" x="81" y="46" text-anchor="middle">question</text>
-          <text class="svg-m" x="251" y="46" text-anchor="middle">mode: llm_rag</text>
-          <text class="svg-m" x="421" y="46" text-anchor="middle">4 chunks</text>
-          <text class="svg-m" x="591" y="46" text-anchor="middle">prompt</text>
-
-          <path class="edge" d="M761 142 V186 H81 V142" marker-end="url(#m3)" color="var(--line-strong)"/>
-          <text class="svg-m" x="421" y="178" text-anchor="middle">{ answer, sources } — rendered as the bubble and its source chips</text>
-
-          <text class="svg-lbl" x="8" y="226">INSIDE rag.retrieve()</text>
-          <text class="svg-s" x="8" y="252">1 · embed_query() turns the question into 384 numbers, with the same model used at upload.</text>
-          <text class="svg-s" x="8" y="274">2 · ChromaDB compares it to every stored vector and returns the closest top_k = 4.</text>
-          <text class="svg-s" x="8" y="296">3 · Anything scoring below min_score = 0.35 is dropped before the prompt is built.</text>
-        </svg>
-      </div>
-      <figcaption>
-        <b>Measured on our build.</b> “How many vacation days do I get?” scored <code>0.59</code> against a
-        passage reading “24 days of paid annual leave” — no shared keywords. That is meaning-based search
-        doing its job.
-      </figcaption>
-    </figure>
 
     <div class="table-wrap">
       <table>
@@ -708,103 +841,81 @@ npm run ingest
         </tbody>
       </table>
     </div>
-  </section>
 
-  <!-- ===== 4 ===== -->
-  <section>
-    <div class="sec-head">
-      <span class="idx">04</span>
-      <h2>The prompt, and where citations come from</h2>
-      <span class="mins">5 min</span>
+    <div class="table-wrap">
+      <table>
+        <caption>Which file does what</caption>
+        <thead><tr><th>File</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td><code>app/api/chat.py</code></td><td>Chooses the path for each mode, maps errors to status codes</td></tr>
+          <tr><td><code>app/api/documents.py</code></td><td>Upload, list and delete documents</td></tr>
+          <tr><td><code>app/services/ingest.py</code></td><td>Extract text, chunk it, store it</td></tr>
+          <tr><td><code>app/services/embeddings.py</code></td><td>Turns text into vectors, locally</td></tr>
+          <tr><td><code>app/services/vector_store.py</code></td><td>ChromaDB wrapper: add, search, delete</td></tr>
+          <tr><td><code>app/services/rag.py</code></td><td>Retrieval, and the <code>min_score</code> filter</td></tr>
+          <tr><td><code>app/services/llm.py</code></td><td>Prompts and the DeepSeek call</td></tr>
+          <tr><td><code>src/services/chatService.js</code></td><td>Every call the frontend makes</td></tr>
+        </tbody>
+      </table>
     </div>
-    <p class="lede">
-      <code>llm.py</code> builds one message: a system prompt with the rules, the retrieved chunks
-      numbered <code>[1]</code>…<code>[4]</code>, then the question. The model is told to answer only
-      from those passages and to cite them by number.
-    </p>
-
-    <figure>
-      <div class="scroller">
-        <svg viewBox="0 0 840 318" role="img" aria-label="The prompt has three parts: the system rules, the numbered chunks with their source and page, and the question. DeepSeek returns an answer containing bracket numbers, which the API turns into a sources array for the UI.">
-          <defs>
-            <marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
-            </marker>
-          </defs>
-
-          <text class="svg-lbl" x="30" y="22">WHAT llm.py SENDS</text>
-          <rect x="30" y="34" width="370" height="266" rx="8" fill="var(--surface-2)" stroke="var(--line)"/>
-
-          <rect class="svg-box" x="46" y="50" width="338" height="66" rx="5"/>
-          <text class="svg-m" x="60" y="70">system</text>
-          <text class="svg-s" x="60" y="90">Answer using ONLY the passages below.</text>
-          <text class="svg-s" x="60" y="108">If they don't contain it, say so. Cite [n].</text>
-
-          <rect class="svg-box-local" x="46" y="126" width="338" height="54" rx="5"/>
-          <text class="svg-code" x="60" y="148">[1]</text>
-          <text class="svg-s" x="92" y="148">The Orion engine delivers 92 kN…</text>
-          <text class="svg-m" x="92" y="168">chunk from orion.pdf, page 2</text>
-
-          <rect class="svg-box-local" x="46" y="190" width="338" height="54" rx="5"/>
-          <text class="svg-code" x="60" y="212">[2]</text>
-          <text class="svg-s" x="92" y="212">First flight is scheduled for Nov 2027…</text>
-          <text class="svg-m" x="92" y="232">chunk from orion.pdf, page 3</text>
-
-          <rect class="svg-box" x="46" y="254" width="338" height="34" rx="5"/>
-          <text class="svg-m" x="60" y="276">user</text>
-          <text class="svg-s" x="112" y="276">When is the first flight?</text>
-
-          <g color="var(--net)">
-            <line class="edge-net" x1="406" y1="110" x2="466" y2="110" marker-end="url(#m4)"/>
-          </g>
-          <text class="svg-m" x="436" y="100" text-anchor="middle">HTTPS</text>
-
-          <rect class="svg-box-net" x="472" y="82" width="160" height="56" rx="6"/>
-          <text class="svg-code" x="552" y="108" text-anchor="middle">deepseek-chat</text>
-          <text class="svg-s" x="552" y="126" text-anchor="middle">api.deepseek.com</text>
-
-          <g color="var(--line-strong)">
-            <line class="edge" x1="638" y1="110" x2="666" y2="110" marker-end="url(#m4)"/>
-          </g>
-
-          <rect class="svg-box-local" x="672" y="82" width="150" height="56" rx="6"/>
-          <text class="svg-t" x="747" y="108" text-anchor="middle">answer</text>
-          <text class="svg-s" x="747" y="126" text-anchor="middle">“…Nov 2027 [2]”</text>
-
-          <text class="svg-lbl" x="472" y="178">HOW THE CHIPS APPEAR</text>
-          <text class="svg-s" x="472" y="204">chat.py returns the chunks it used</text>
-          <text class="svg-s" x="472" y="226">as a sources array, each with its</text>
-          <text class="svg-s" x="472" y="248">file name, page and score.</text>
-          <text class="svg-s" x="472" y="280">MessageList.jsx renders those as</text>
-          <text class="svg-s" x="472" y="302">the chips under the bubble.</text>
-        </svg>
-      </div>
-      <figcaption>
-        <b>The refusal is tested.</b> With only the handbook indexed we asked for the capital of Brazil;
-        the reply said the passages do not cover it instead of answering from training. That behaviour comes
-        from the system prompt, not from luck.
-      </figcaption>
-    </figure>
-
-    <h3 class="sub">The real response, copied from a live run</h3>
-<pre><code>{ <span class="k">"answer"</span>: <span class="v">"You get 24 days of paid annual leave per calendar year,
-              and unused leave can be carried over up to 5 days [1]."</span>,
-  <span class="k">"sources"</span>: [ { <span class="k">"label"</span>: <span class="v">"company-handbook.md"</span>,
-                 <span class="k">"page"</span>:  <span class="v">null</span>,
-                 <span class="k">"score"</span>: <span class="v">0.568</span> } ] }</code></pre>
   </section>
 
   <!-- ===== 5 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">05</span>
-      <h2>What actually leaves the machine</h2>
-      <span class="mins">6 min</span>
+      <h2>Tech, tools and services</h2>
     </div>
     <p class="lede">
-      Nothing about DeepSeek changes when we use it: our documents are not added to the model, and it
-      keeps no memory between requests. What is true is that <b>the text of the retrieved chunks is sent
-      to DeepSeek with every RAG question</b> — roughly 800 words, over HTTPS.
+      Everything runs locally except one thing: the call that writes the final answer. Embeddings do not
+      need an account, so uploading and searching work offline.
+    </p>
+
+    <div class="table-wrap">
+      <table>
+        <caption>What each piece does, and where it runs</caption>
+        <thead><tr><th>Tool</th><th>Its job here</th><th>Runs</th></tr></thead>
+        <tbody>
+          <tr><td><b>React + Vite</b></td><td>Chat UI, Docs panel, mode dropdown; proxies <code>/api</code> in dev</td><td><span class="where local">local</span></td></tr>
+          <tr><td><b>FastAPI</b></td><td>The HTTP API, request validation, error mapping</td><td><span class="where local">local</span></td></tr>
+          <tr><td><b>pypdf · python-docx</b></td><td>Pull text out of PDF and Word files, page by page</td><td><span class="where local">local</span></td></tr>
+          <tr><td><b>fastembed</b></td><td>Runs <code>bge-small-en-v1.5</code> on ONNX to make 384-number vectors</td><td><span class="where local">local</span></td></tr>
+          <tr><td><b>ChromaDB</b></td><td>Stores vectors and does the cosine search; persists to a folder</td><td><span class="where local">local</span></td></tr>
+          <tr><td><b>httpx</b></td><td>Makes the HTTPS call to DeepSeek</td><td><span class="where local">local</span></td></tr>
+          <tr><td><b>DeepSeek API</b></td><td><code>deepseek-chat</code> writes the final answer</td><td><span class="where net">external</span></td></tr>
+          <tr><td><b>uv · pytest · ruff</b></td><td>Dependencies, 17 tests, linting. Tests stub the model call</td><td><span class="where local">local</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3>Run it</h3>
+        <p>
+          <code>npm run setup</code> once, then <code>npm run dev</code> starts the API on
+          <code>:8000</code> and the UI on <code>:5173</code>. API docs at <code>/docs</code>.
+        </p>
+      </div>
+      <div class="card">
+        <h3>Swap any piece</h3>
+        <p>
+          Each service is one file behind a small function. Changing the vector database or the model
+          provider means editing that file, not the pipeline.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 6 ===== -->
+  <section>
+    <div class="sec-head">
+      <span class="idx">06</span>
+      <h2>Security: what leaves the machine</h2>
+    </div>
+    <p class="lede">
+      The question everyone asks is whether the model now has our documents. It does not: nothing is
+      trained, and the model keeps no memory between requests. What is true is that <b>the text of the
+      retrieved chunks is sent to DeepSeek with every RAG question</b> — roughly 800 words, over HTTPS.
     </p>
 
     <figure>
@@ -899,7 +1010,7 @@ npm run ingest
 
     <div class="grid-2">
       <div class="card">
-        <h3>Try it live</h3>
+        <h3>Try it yourself</h3>
         <p>
           Upload a document in the Docs panel, ask something it covers, then ask something it does not.
           The second answer should say the documents don't cover it — that is the system prompt working.
@@ -917,8 +1028,7 @@ npm run ingest
   </section>
 
   <footer>
-    <span>RAG session · 30 minutes · 5 diagrams</span>
-    <span>Every value and response on this page came from a live run of this repo</span>
+    Every value, response and score on this page came from a live run of this repo.
   </footer>
 
 </div>
