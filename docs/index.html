@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="A plain-language, picture-led 30-minute explainer of how a RAG app finds answers in your own documents.">
+<meta name="description" content="How our RAG app answers a question, traced through the real endpoints, files and settings in this repo.">
 <style>
   :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
   body { margin: 0; font-family: system-ui, sans-serif; font-size: 14px; }
@@ -28,6 +28,8 @@
     --local-soft: rgba(11, 127, 140, 0.12);
     --net: #a8500f;
     --net-soft: rgba(168, 80, 15, 0.12);
+    --code-bg: #10181f;
+    --code-ink: #dbe6ee;
     --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
   }
@@ -46,6 +48,8 @@
       --local-soft: rgba(69, 211, 224, 0.15);
       --net: #f0a35e;
       --net-soft: rgba(240, 163, 94, 0.15);
+      --code-bg: #0a1117;
+      --code-ink: #cfdde8;
     }
   }
 
@@ -62,6 +66,8 @@
     --local-soft: rgba(69, 211, 224, 0.15);
     --net: #f0a35e;
     --net-soft: rgba(240, 163, 94, 0.15);
+    --code-bg: #0a1117;
+    --code-ink: #cfdde8;
   }
 
   body {
@@ -110,7 +116,7 @@
 
   .standfirst {
     margin: 14px 0 0;
-    max-width: 56ch;
+    max-width: 58ch;
     color: var(--muted);
     font-size: 1.05rem;
   }
@@ -127,12 +133,7 @@
     color: var(--muted);
   }
 
-  .clock b {
-    display: block;
-    color: var(--ink);
-    font-size: 1.45rem;
-    font-weight: 600;
-  }
+  .clock b { display: block; color: var(--ink); font-size: 1.45rem; font-weight: 600; }
 
   .agenda {
     display: grid;
@@ -145,14 +146,7 @@
     border: 1px solid var(--line);
   }
 
-  .agenda li {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 12px 14px;
-    background: var(--surface);
-  }
-
+  .agenda li { display: flex; flex-direction: column; gap: 2px; padding: 12px 14px; background: var(--surface); }
   .agenda .num { font-family: var(--mono); font-size: 0.7rem; color: var(--local); }
   .agenda .what { font-weight: 600; font-size: 0.92rem; line-height: 1.25; }
   .agenda .mins { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); }
@@ -171,7 +165,7 @@
 
   h2 {
     margin: 0;
-    font-size: clamp(1.35rem, 3vw, 1.7rem);
+    font-size: clamp(1.3rem, 3vw, 1.65rem);
     font-weight: 600;
     letter-spacing: -0.02em;
     text-wrap: balance;
@@ -185,15 +179,44 @@
     white-space: nowrap;
   }
 
-  .lede {
-    margin: 16px 0 0;
-    max-width: 62ch;
-    font-size: 1.05rem;
-  }
-
+  .lede { margin: 16px 0 0; max-width: 64ch; font-size: 1.02rem; }
   .lede + .lede { margin-top: 10px; color: var(--muted); }
 
-  .lede strong { font-weight: 600; }
+  h3.sub {
+    margin: 28px 0 0;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--local);
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: 0.87em;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+  }
+
+  pre {
+    margin: 14px 0 0;
+    padding: 16px 18px;
+    overflow-x: auto;
+    border-radius: 8px;
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-family: var(--mono);
+    font-size: 0.83rem;
+    line-height: 1.6;
+  }
+
+  pre code { padding: 0; background: none; border: 0; font-size: 1em; color: inherit; }
+  pre .c { color: #7f96a6; }
+  pre .k { color: #6ed7e3; }
+  pre .v { color: #f0b071; }
 
   figure {
     margin: 22px 0 0;
@@ -208,7 +231,7 @@
   figure svg {
     display: block;
     width: 100%;
-    min-width: 600px;
+    min-width: 620px;
     max-width: 100%;
     height: auto;
     color: var(--ink);
@@ -227,39 +250,15 @@
   .svg-box { fill: var(--surface-2); stroke: var(--line-strong); }
   .svg-box-local { fill: var(--local-soft); stroke: var(--local); }
   .svg-box-net { fill: var(--net-soft); stroke: var(--net); }
-  .svg-t { fill: var(--ink); font-family: var(--sans); font-size: 14px; font-weight: 600; }
-  .svg-s { fill: var(--muted); font-family: var(--sans); font-size: 12px; }
+  .svg-t { fill: var(--ink); font-family: var(--sans); font-size: 13.5px; font-weight: 600; }
+  .svg-code { fill: var(--ink); font-family: var(--mono); font-size: 12px; font-weight: 500; }
+  .svg-s { fill: var(--muted); font-family: var(--sans); font-size: 11.5px; }
   .svg-m { fill: var(--muted); font-family: var(--mono); font-size: 10px; }
   .svg-lbl { fill: var(--local); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; }
   .svg-lbl-net { fill: var(--net); font-family: var(--mono); font-size: 10.5px; letter-spacing: 0.1em; }
   .edge { stroke: var(--line-strong); stroke-width: 1.5; fill: none; }
   .edge-local { stroke: var(--local); stroke-width: 1.7; fill: none; }
   .edge-net { stroke: var(--net); stroke-width: 1.7; fill: none; }
-
-  .words {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 18px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .words li {
-    padding: 6px 12px;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    background: var(--surface);
-    font-size: 0.82rem;
-    color: var(--muted);
-  }
-
-  .words b {
-    color: var(--ink);
-    font-family: var(--mono);
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
 
   .grid-2 {
     display: grid;
@@ -268,12 +267,7 @@
     margin-top: 20px;
   }
 
-  .card {
-    padding: 16px 18px;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    background: var(--surface);
-  }
+  .card { padding: 16px 18px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
 
   .card h3 {
     margin: 0 0 8px;
@@ -298,7 +292,7 @@
     background: var(--surface);
   }
 
-  table { width: 100%; min-width: 520px; border-collapse: collapse; font-size: 0.92rem; }
+  table { width: 100%; min-width: 540px; border-collapse: collapse; font-size: 0.92rem; }
 
   caption {
     padding: 14px 14px 4px;
@@ -322,9 +316,9 @@
     background: var(--surface-2);
   }
 
-  td:first-child { font-weight: 600; white-space: nowrap; }
+  td:first-child { white-space: nowrap; }
+  td:first-child code { white-space: nowrap; }
   tr:last-child td { border-bottom: 0; }
-  code, .mono { font-family: var(--mono); font-size: 0.86em; }
 
   .checks { margin: 20px 0 0; padding: 0; list-style: none; display: grid; gap: 10px; }
 
@@ -342,6 +336,7 @@
   }
 
   .checks li.ok { border-left-color: var(--local); }
+
   .checks .tag {
     font-family: var(--mono);
     font-size: 0.7rem;
@@ -350,19 +345,9 @@
     color: var(--net);
     padding-top: 3px;
   }
+
   .checks li.ok .tag { color: var(--local); }
   .checks b { color: var(--ink); font-weight: 600; }
-
-  .pull {
-    margin: 24px 0 0;
-    padding: 18px 20px;
-    border: 1px solid var(--line-strong);
-    border-radius: 8px;
-    background: var(--surface-2);
-  }
-
-  .pull .q { margin: 0 0 6px; font-weight: 600; }
-  .pull .a { margin: 0; color: var(--muted); font-size: 0.97rem; }
 
   footer {
     margin-top: 56px;
@@ -377,13 +362,11 @@
     color: var(--muted);
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; transition: none !important; }
-  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
 
   @media print {
     body { background: #fff; }
-    figure, .card, .table-wrap, .checks li, .pull { break-inside: avoid; }
+    figure, .card, .table-wrap, .checks li, pre { break-inside: avoid; }
   }
 </style>
 
@@ -393,562 +376,507 @@
 
   <header class="masthead">
     <div>
-      <p class="kicker">Team session · plain-language guide</p>
+      <p class="kicker">Team session · our RAG app, start to finish</p>
       <h1>RAG in 30 Minutes</h1>
       <p class="standfirst">
-        How we got an AI to answer from <em>our</em> documents instead of guessing —
-        explained with sticky notes, in five pictures.
+        What happens between pressing send and seeing an answer — traced through the real
+        endpoints, files and functions in this repo.
       </p>
     </div>
-    <div class="clock"><b>30</b>minutes<br>5 pictures</div>
+    <div class="clock"><b>30</b>minutes<br>5 diagrams</div>
   </header>
 
   <ol class="agenda">
-    <li><span class="num">01</span><span class="what">Closed book vs open book</span><span class="mins">4 min</span></li>
-    <li><span class="num">02</span><span class="what">Cut it into notes</span><span class="mins">5 min</span></li>
-    <li><span class="num">03</span><span class="what">Sort notes by meaning</span><span class="mins">6 min</span></li>
-    <li><span class="num">04</span><span class="what">Let the AI read them</span><span class="mins">5 min</span></li>
-    <li><span class="num">05</span><span class="what">Is our stuff safe?</span><span class="mins">6 min</span></li>
-    <li><span class="num">06</span><span class="what">What we built it with</span><span class="mins">4 min</span></li>
+    <li><span class="num">01</span><span class="what">The problem &amp; the two modes</span><span class="mins">4 min</span></li>
+    <li><span class="num">02</span><span class="what">Uploading a document</span><span class="mins">7 min</span></li>
+    <li><span class="num">03</span><span class="what">Asking a question</span><span class="mins">8 min</span></li>
+    <li><span class="num">04</span><span class="what">The prompt we send</span><span class="mins">5 min</span></li>
+    <li><span class="num">05</span><span class="what">What leaves the machine</span><span class="mins">6 min</span></li>
   </ol>
 
   <!-- ===== 1 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">01</span>
-      <h2>An AI taking a closed-book exam</h2>
+      <h2>Why we need RAG, and the two modes</h2>
       <span class="mins">4 min</span>
     </div>
     <p class="lede">
-      Ask a normal AI about our company and it is sitting a <strong>closed-book exam</strong>.
-      It has never seen our files, so it answers from memory. Sometimes it is right. Sometimes it
-      invents something that sounds right.
+      DeepSeek has never seen our documents. Ask it about our leave policy and it answers from its
+      training data — confidently, and often wrongly. <b>RAG</b> means: find the relevant text in our own
+      files first, put that text in the prompt, and let the model answer from it.
     </p>
     <p class="lede">
-      RAG turns it into an <strong>open-book exam</strong>. Before answering, we find the right page
-      and put it in front of the AI. Same AI, better answer — and now it can show you where the answer came from.
+      Our app has both, chosen by the dropdown. Both hit the same endpoint,
+      <code>POST /api/chat</code>, with a different <code>mode</code>. The branch is four lines in
+      <code>app/api/chat.py</code>.
     </p>
 
     <figure>
       <div class="scroller">
-        <svg viewBox="0 0 840 292" role="img" aria-label="Closed book: a question goes straight to the AI, which answers from memory and may be wrong. Open book: the question first finds the right pages in our documents, the AI reads those pages, and the answer shows where it came from.">
+        <svg viewBox="0 0 840 296" role="img" aria-label="Both modes post to slash api slash chat. With mode llm the request goes straight to llm.generate_answer and returns an answer with an empty sources list. With mode llm_rag it first calls rag.retrieve to get four chunks, passes them as context, and returns an answer plus sources.">
           <defs>
             <marker id="m1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
             </marker>
           </defs>
 
-          <text class="svg-m" x="30" y="22" letter-spacing="0.12em">CLOSED BOOK — ANSWERING FROM MEMORY</text>
+          <text class="svg-m" x="30" y="22" letter-spacing="0.12em">MODE: "LLM" — NO LOOKUP</text>
 
-          <rect class="svg-box" x="30" y="36" width="210" height="72" rx="6"/>
-          <text class="svg-t" x="135" y="68" text-anchor="middle">Someone asks</text>
-          <text class="svg-s" x="135" y="89" text-anchor="middle">“How many leave days?”</text>
+          <rect class="svg-box" x="30" y="34" width="230" height="66" rx="6"/>
+          <text class="svg-code" x="145" y="60" text-anchor="middle">POST /api/chat</text>
+          <text class="svg-s" x="145" y="82" text-anchor="middle">mode: "llm"</text>
 
-          <rect class="svg-box" x="315" y="36" width="210" height="72" rx="6"/>
-          <text class="svg-t" x="420" y="68" text-anchor="middle">AI answers</text>
-          <text class="svg-s" x="420" y="89" text-anchor="middle">from what it remembers</text>
+          <rect class="svg-box" x="340" y="34" width="230" height="66" rx="6"/>
+          <text class="svg-code" x="455" y="60" text-anchor="middle">llm.generate_answer()</text>
+          <text class="svg-s" x="455" y="82" text-anchor="middle">question only, no context</text>
 
-          <rect class="svg-box" x="600" y="36" width="210" height="72" rx="6"/>
-          <text class="svg-t" x="705" y="68" text-anchor="middle">Might be wrong</text>
-          <text class="svg-s" x="705" y="89" text-anchor="middle">and you cannot check</text>
+          <rect class="svg-box" x="650" y="34" width="160" height="66" rx="6"/>
+          <text class="svg-t" x="730" y="60" text-anchor="middle">answer</text>
+          <text class="svg-s" x="730" y="82" text-anchor="middle">sources: []</text>
 
           <g color="var(--line-strong)">
-            <line class="edge" x1="244" y1="72" x2="309" y2="72" marker-end="url(#m1)"/>
-            <line class="edge" x1="529" y1="72" x2="594" y2="72" marker-end="url(#m1)"/>
+            <line class="edge" x1="264" y1="67" x2="334" y2="67" marker-end="url(#m1)"/>
+            <line class="edge" x1="574" y1="67" x2="644" y2="67" marker-end="url(#m1)"/>
           </g>
-          <text class="svg-m" x="276" y="62" text-anchor="middle">no book</text>
-          <text class="svg-m" x="561" y="62" text-anchor="middle">a guess</text>
 
-          <text class="svg-lbl" x="30" y="158" letter-spacing="0.12em">OPEN BOOK — READING FIRST, THEN ANSWERING</text>
+          <text class="svg-lbl" x="30" y="158" letter-spacing="0.12em">MODE: "LLM_RAG" — LOOK UP FIRST</text>
 
-          <rect class="svg-box" x="25" y="172" width="175" height="76" rx="6"/>
-          <text class="svg-t" x="112" y="204" text-anchor="middle">Someone asks</text>
-          <text class="svg-s" x="112" y="225" text-anchor="middle">the same question</text>
+          <rect class="svg-box" x="25" y="170" width="178" height="76" rx="6"/>
+          <text class="svg-code" x="114" y="198" text-anchor="middle">POST /api/chat</text>
+          <text class="svg-s" x="114" y="220" text-anchor="middle">mode: "llm_rag"</text>
 
-          <rect class="svg-box-local" x="230" y="172" width="175" height="76" rx="6"/>
-          <text class="svg-t" x="317" y="204" text-anchor="middle">We find the pages</text>
-          <text class="svg-s" x="317" y="225" text-anchor="middle">in our own documents</text>
+          <rect class="svg-box-local" x="233" y="170" width="178" height="76" rx="6"/>
+          <text class="svg-code" x="322" y="198" text-anchor="middle">rag.retrieve()</text>
+          <text class="svg-s" x="322" y="220" text-anchor="middle">4 chunks from our files</text>
 
-          <rect class="svg-box" x="435" y="172" width="175" height="76" rx="6"/>
-          <text class="svg-t" x="522" y="204" text-anchor="middle">AI reads them</text>
-          <text class="svg-s" x="522" y="225" text-anchor="middle">instead of guessing</text>
+          <rect class="svg-box" x="441" y="170" width="178" height="76" rx="6"/>
+          <text class="svg-code" x="530" y="198" text-anchor="middle">generate_answer()</text>
+          <text class="svg-s" x="530" y="220" text-anchor="middle">chunks + question</text>
 
-          <rect class="svg-box-local" x="640" y="172" width="175" height="76" rx="6"/>
-          <text class="svg-t" x="727" y="204" text-anchor="middle">Answer + source</text>
-          <text class="svg-s" x="727" y="225" text-anchor="middle">you can go check it</text>
+          <rect class="svg-box-local" x="649" y="170" width="166" height="76" rx="6"/>
+          <text class="svg-t" x="732" y="198" text-anchor="middle">answer</text>
+          <text class="svg-s" x="732" y="220" text-anchor="middle">sources: [...]</text>
 
           <g color="var(--local)">
-            <line class="edge-local" x1="204" y1="210" x2="224" y2="210" marker-end="url(#m1)"/>
-            <line class="edge-local" x1="409" y1="210" x2="429" y2="210" marker-end="url(#m1)"/>
-            <line class="edge-local" x1="614" y1="210" x2="634" y2="210" marker-end="url(#m1)"/>
+            <line class="edge-local" x1="207" y1="208" x2="227" y2="208" marker-end="url(#m1)"/>
+            <line class="edge-local" x1="415" y1="208" x2="435" y2="208" marker-end="url(#m1)"/>
+            <line class="edge-local" x1="623" y1="208" x2="643" y2="208" marker-end="url(#m1)"/>
           </g>
-          <text class="svg-m" x="214" y="166" text-anchor="middle">find</text>
-          <text class="svg-m" x="419" y="166" text-anchor="middle">read</text>
-          <text class="svg-m" x="624" y="166" text-anchor="middle">show</text>
 
-          <text class="svg-s" x="30" y="278">Same AI in both rows. The only difference is what we put in front of it.</text>
+          <text class="svg-s" x="30" y="282">Same endpoint, same model. The only difference is whether chunks go into the prompt.</text>
         </svg>
       </div>
       <figcaption>
-        <b>That is the whole idea.</b> Everything after this slide is just the plumbing that finds
-        the right pages fast.
+        <b>Keep both modes.</b> Asking the same question twice, once per mode, is the fastest way to show
+        someone what retrieval actually adds.
       </figcaption>
     </figure>
 
-    <ul class="words">
-      <li><b>RAG</b> = retrieval-augmented generation</li>
-      <li>“retrieval” = look it up first</li>
-      <li>“generation” = then write the answer</li>
-    </ul>
+    <h3 class="sub">The request our frontend sends</h3>
+<pre><code><span class="c">// frontend/src/services/chatService.js</span>
+POST /api/chat
+{ <span class="k">"question"</span>: <span class="v">"How many vacation days do I get?"</span>,
+  <span class="k">"mode"</span>:     <span class="v">"llm_rag"</span> }</code></pre>
   </section>
 
   <!-- ===== 2 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">02</span>
-      <h2>Step 1 — cut the documents into sticky notes</h2>
-      <span class="mins">5 min</span>
+      <h2>Uploading a document: chunking and embedding</h2>
+      <span class="mins">7 min</span>
     </div>
     <p class="lede">
-      We cannot hand the AI a 200-page PDF; it is too big, and most of it has nothing to do with
-      the question. So when a file is uploaded, we <strong>cut it into small notes of about 200 words each</strong>.
+      This runs once per file, when someone uploads it in the Docs panel. Two words to get straight:
     </p>
     <p class="lede">
-      One trick matters: each note <strong>repeats the last few lines of the note before it</strong>.
-      Without that, a sentence can get cut in half and then neither note makes sense.
+      A <b>chunk</b> is a slice of the document — ours are 200 words long. An <b>embedding</b> is that
+      chunk turned into a list of 384 numbers that represents its meaning. Chunks about the same subject
+      end up with similar numbers, which is what makes search by meaning possible.
     </p>
 
     <figure>
       <div class="scroller">
-        <svg viewBox="0 0 840 334" role="img" aria-label="A document is cut into four notes of about 200 words. Each note after the first begins by repeating the last lines of the previous note, shown as a shaded strip across the top of the note.">
+        <svg viewBox="0 0 840 330" role="img" aria-label="Upload pipeline: POST slash api slash documents calls extract_blocks, then chunk_text with 200 words and 40 overlap, then embed_documents using fastembed to make 384-number vectors, then add_chunks which writes to ChromaDB on disk. Below, the shape of one stored record.">
           <defs>
             <marker id="m2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
             </marker>
           </defs>
 
-          <text class="svg-m" x="30" y="22" letter-spacing="0.12em">ONE DOCUMENT</text>
-          <rect class="svg-box" x="30" y="34" width="190" height="250" rx="6"/>
-          <g fill="var(--line)">
-            <rect x="48" y="56" width="154" height="6" rx="3"/>
-            <rect x="48" y="78" width="154" height="6" rx="3"/>
-            <rect x="48" y="100" width="130" height="6" rx="3"/>
-            <rect x="48" y="122" width="154" height="6" rx="3"/>
-            <rect x="48" y="144" width="144" height="6" rx="3"/>
-            <rect x="48" y="166" width="154" height="6" rx="3"/>
-            <rect x="48" y="188" width="118" height="6" rx="3"/>
-            <rect x="48" y="210" width="154" height="6" rx="3"/>
-            <rect x="48" y="232" width="138" height="6" rx="3"/>
-            <rect x="48" y="254" width="96" height="6" rx="3"/>
-          </g>
-          <text class="svg-s" x="125" y="306" text-anchor="middle">a PDF, Word file or text file</text>
+          <rect class="svg-box" x="12" y="34" width="136" height="70" rx="6"/>
+          <text class="svg-code" x="80" y="60" text-anchor="middle">documents.py</text>
+          <text class="svg-s" x="80" y="80" text-anchor="middle">POST upload</text>
+          <text class="svg-s" x="80" y="96" text-anchor="middle">max 20 MB</text>
+
+          <rect class="svg-box" x="182" y="34" width="136" height="70" rx="6"/>
+          <text class="svg-code" x="250" y="60" text-anchor="middle">extract_</text>
+          <text class="svg-code" x="250" y="76" text-anchor="middle">blocks()</text>
+          <text class="svg-s" x="250" y="96" text-anchor="middle">pypdf · python-docx</text>
+
+          <rect class="svg-box" x="352" y="34" width="136" height="70" rx="6"/>
+          <text class="svg-code" x="420" y="60" text-anchor="middle">chunk_text()</text>
+          <text class="svg-s" x="420" y="80" text-anchor="middle">200 words each</text>
+          <text class="svg-s" x="420" y="96" text-anchor="middle">40 words overlap</text>
+
+          <rect class="svg-box-local" x="522" y="34" width="136" height="70" rx="6"/>
+          <text class="svg-code" x="590" y="60" text-anchor="middle">embed_</text>
+          <text class="svg-code" x="590" y="76" text-anchor="middle">documents()</text>
+          <text class="svg-s" x="590" y="96" text-anchor="middle">fastembed, local</text>
+
+          <rect class="svg-box-local" x="692" y="34" width="136" height="70" rx="6"/>
+          <text class="svg-code" x="760" y="60" text-anchor="middle">add_chunks()</text>
+          <text class="svg-s" x="760" y="80" text-anchor="middle">ChromaDB</text>
+          <text class="svg-s" x="760" y="96" text-anchor="middle">data/chroma</text>
 
           <g color="var(--line-strong)">
-            <line class="edge" x1="228" y1="160" x2="286" y2="160" marker-end="url(#m2)"/>
+            <line class="edge" x1="152" y1="69" x2="176" y2="69" marker-end="url(#m2)"/>
+            <line class="edge" x1="322" y1="69" x2="346" y2="69" marker-end="url(#m2)"/>
+            <line class="edge" x1="492" y1="69" x2="516" y2="69" marker-end="url(#m2)"/>
+            <line class="edge" x1="662" y1="69" x2="686" y2="69" marker-end="url(#m2)"/>
           </g>
-          <text class="svg-m" x="257" y="150" text-anchor="middle">cut</text>
+          <text class="svg-m" x="164" y="26" text-anchor="middle">text</text>
+          <text class="svg-m" x="334" y="26" text-anchor="middle">pages</text>
+          <text class="svg-m" x="504" y="26" text-anchor="middle">chunks</text>
+          <text class="svg-m" x="674" y="26" text-anchor="middle">vectors</text>
 
-          <text class="svg-m" x="300" y="22" letter-spacing="0.12em">FOUR STICKY NOTES</text>
+          <text class="svg-lbl" x="12" y="146">ONE ROW IN CHROMADB AFTER UPLOADING orion.pdf</text>
 
-          <rect class="svg-box" x="300" y="34" width="330" height="58" rx="6"/>
-          <text class="svg-t" x="316" y="58">Note 1</text>
-          <text class="svg-s" x="316" y="78">the first 200 words</text>
+          <rect class="svg-box" x="12" y="158" width="470" height="150" rx="6"/>
+          <text class="svg-m" x="30" y="184">id</text>
+          <text class="svg-code" x="120" y="184">orion.pdf::1</text>
+          <text class="svg-m" x="30" y="212">text</text>
+          <text class="svg-s" x="120" y="212">"The Orion engine delivers 92 kN…"</text>
+          <text class="svg-m" x="30" y="240">source</text>
+          <text class="svg-code" x="120" y="240">orion.pdf</text>
+          <text class="svg-m" x="30" y="268">page</text>
+          <text class="svg-code" x="120" y="268">2</text>
+          <text class="svg-m" x="30" y="296">vector</text>
+          <text class="svg-code" x="120" y="296">[0.031, -0.118, … ]</text>
 
-          <rect class="svg-box" x="300" y="102" width="330" height="58" rx="6"/>
-          <rect class="svg-box-local" x="300" y="102" width="330" height="20" rx="6"/>
-          <text class="svg-m" x="316" y="116">repeats the end of note 1</text>
-          <text class="svg-t" x="316" y="140">Note 2</text>
-          <text class="svg-s" x="386" y="140">the next 200 words</text>
-
-          <rect class="svg-box" x="300" y="170" width="330" height="58" rx="6"/>
-          <rect class="svg-box-local" x="300" y="170" width="330" height="20" rx="6"/>
-          <text class="svg-m" x="316" y="184">repeats the end of note 2</text>
-          <text class="svg-t" x="316" y="208">Note 3</text>
-          <text class="svg-s" x="386" y="208">the next 200 words</text>
-
-          <rect class="svg-box" x="300" y="238" width="330" height="58" rx="6"/>
-          <rect class="svg-box-local" x="300" y="238" width="330" height="20" rx="6"/>
-          <text class="svg-m" x="316" y="252">repeats the end of note 3</text>
-          <text class="svg-t" x="316" y="276">Note 4</text>
-          <text class="svg-s" x="386" y="276">the last words</text>
-
-          <rect class="svg-box-local" x="660" y="120" width="150" height="90" rx="6"/>
-          <text class="svg-t" x="735" y="152" text-anchor="middle">40 words</text>
-          <text class="svg-s" x="735" y="172" text-anchor="middle">shared by each</text>
-          <text class="svg-s" x="735" y="190" text-anchor="middle">pair of notes</text>
-
-          <text class="svg-s" x="300" y="322">Each note remembers its file name and page number.</text>
+          <text class="svg-s" x="512" y="184">The vector is what gets searched.</text>
+          <text class="svg-s" x="512" y="206">The text is what gets sent to the</text>
+          <text class="svg-s" x="512" y="228">model later. The source and page</text>
+          <text class="svg-s" x="512" y="250">become the chips under the answer.</text>
+          <text class="svg-s" x="512" y="286">Re-uploading a file deletes its old</text>
+          <text class="svg-s" x="512" y="308">rows first, so nothing duplicates.</text>
         </svg>
       </div>
       <figcaption>
-        <b>Why the repeat matters.</b> “…carried over, up to a maximum of 5 days” could land half in
-        one note and half in the next. Then neither note answers the question. The overlap costs a little
-        extra storage and removes the problem.
+        <b>Why the 40-word overlap.</b> A fixed cut can split “…carried over, up to a maximum of 5 days”
+        across two chunks, so neither matches the question. The overlap means every sentence survives
+        whole in at least one chunk.
       </figcaption>
     </figure>
 
-    <ul class="words">
-      <li>sticky note = <b>chunk</b></li>
-      <li>the repeat = <b>overlap</b></li>
-      <li>our settings = <b>200 words, 40 shared</b></li>
-    </ul>
+    <h3 class="sub">Doing it from the terminal instead of the UI</h3>
+<pre><code><span class="c"># put files in backend/data/docs/ then:</span>
+npm run ingest
+  company-handbook.md: 1 chunks
+  Indexed 1 file(s); 1 chunks total.</code></pre>
   </section>
 
   <!-- ===== 3 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">03</span>
-      <h2>Step 2 — put every note on a meaning map</h2>
-      <span class="mins">6 min</span>
+      <h2>Asking a question: the full path</h2>
+      <span class="mins">8 min</span>
     </div>
     <p class="lede">
-      Now we need to find the right notes in a pile of thousands, fast. Searching for matching
-      <em>words</em> is not good enough: someone asks about “vacation days”, and the document only says
-      “paid annual leave”.
-    </p>
-    <p class="lede">
-      So we give every note a position on a <strong>map of meaning</strong>. Notes about the same topic land
-      near each other, whatever words they use. The question gets a position on that same map, and we
-      simply <strong>pick the closest notes</strong>.
+      Five hops, about two seconds. The only step that touches the internet is the last one.
     </p>
 
     <figure>
       <div class="scroller">
-        <svg viewBox="0 0 840 382" role="img" aria-label="Notes are drawn as dots on a map, clustered by topic. The question is a marker placed on the same map; the nearest three notes inside a dashed circle are picked, and far-away notes are ignored.">
-          <text class="svg-m" x="30" y="22" letter-spacing="0.12em">THE MEANING MAP</text>
-          <rect x="30" y="34" width="470" height="320" rx="8" fill="var(--surface-2)" stroke="var(--line)"/>
+        <svg viewBox="0 0 840 300" role="img" aria-label="The question goes from ChatInput.jsx to POST slash api slash chat, to rag.retrieve which embeds the question and searches ChromaDB, to llm.py which builds the prompt and calls the DeepSeek API, and the JSON response returns to the browser.">
+          <defs>
+            <marker id="m3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+            </marker>
+          </defs>
 
-          <text class="svg-s" x="180" y="62" text-anchor="middle">notes about engines</text>
-          <text class="svg-s" x="385" y="322" text-anchor="middle">notes about leave days</text>
+          <rect class="svg-box" x="8" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="81" y="88" text-anchor="middle">ChatInput</text>
+          <text class="svg-s" x="81" y="108" text-anchor="middle">user presses ↑</text>
+          <text class="svg-m" x="81" y="126" text-anchor="middle">browser</text>
 
-          <circle cx="195" cy="168" r="88" fill="none" stroke="var(--local)" stroke-width="1.3" stroke-dasharray="5 5"/>
-          <text class="svg-lbl" x="300" y="112">close enough</text>
+          <rect class="svg-box" x="178" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="251" y="88" text-anchor="middle">chat.py</text>
+          <text class="svg-s" x="251" y="108" text-anchor="middle">checks the mode</text>
+          <text class="svg-m" x="251" y="126" text-anchor="middle">FastAPI :8000</text>
 
-          <g stroke="var(--local)" stroke-width="1.4">
-            <line x1="195" y1="168" x2="152" y2="108"/>
-            <line x1="195" y1="168" x2="212" y2="100"/>
-            <line x1="195" y1="168" x2="248" y2="146"/>
+          <rect class="svg-box-local" x="348" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="421" y="88" text-anchor="middle">rag.retrieve()</text>
+          <text class="svg-s" x="421" y="108" text-anchor="middle">embed + search</text>
+          <text class="svg-m" x="421" y="126" text-anchor="middle">ChromaDB</text>
+
+          <rect class="svg-box" x="518" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="591" y="88" text-anchor="middle">llm.py</text>
+          <text class="svg-s" x="591" y="108" text-anchor="middle">builds the prompt</text>
+          <text class="svg-m" x="591" y="126" text-anchor="middle">httpx</text>
+
+          <rect class="svg-box-net" x="688" y="60" width="146" height="78" rx="6"/>
+          <text class="svg-code" x="761" y="88" text-anchor="middle">DeepSeek</text>
+          <text class="svg-s" x="761" y="108" text-anchor="middle">writes the answer</text>
+          <text class="svg-m" x="761" y="126" text-anchor="middle">over HTTPS</text>
+
+          <g color="var(--line-strong)">
+            <line class="edge" x1="158" y1="99" x2="172" y2="99" marker-end="url(#m3)"/>
+            <line class="edge" x1="328" y1="99" x2="342" y2="99" marker-end="url(#m3)"/>
+            <line class="edge" x1="498" y1="99" x2="512" y2="99" marker-end="url(#m3)"/>
+          </g>
+          <g color="var(--net)">
+            <line class="edge-net" x1="668" y1="99" x2="682" y2="99" marker-end="url(#m3)"/>
           </g>
 
-          <circle cx="152" cy="108" r="8" fill="var(--local)"/>
-          <circle cx="212" cy="100" r="8" fill="var(--local)"/>
-          <circle cx="248" cy="146" r="8" fill="var(--local)"/>
+          <text class="svg-m" x="81" y="46" text-anchor="middle">question</text>
+          <text class="svg-m" x="251" y="46" text-anchor="middle">mode: llm_rag</text>
+          <text class="svg-m" x="421" y="46" text-anchor="middle">4 chunks</text>
+          <text class="svg-m" x="591" y="46" text-anchor="middle">prompt</text>
 
-          <circle cx="368" cy="252" r="7" fill="var(--line-strong)"/>
-          <circle cx="410" cy="272" r="7" fill="var(--line-strong)"/>
-          <circle cx="388" cy="292" r="7" fill="var(--line-strong)"/>
-          <circle cx="92" cy="286" r="7" fill="var(--line-strong)"/>
-          <circle cx="440" cy="86" r="7" fill="var(--line-strong)"/>
-          <circle cx="86" cy="196" r="7" fill="var(--line-strong)"/>
+          <path class="edge" d="M761 142 V186 H81 V142" marker-end="url(#m3)" color="var(--line-strong)"/>
+          <text class="svg-m" x="421" y="178" text-anchor="middle">{ answer, sources } — rendered as the bubble and its source chips</text>
 
-          <path d="M195 152 L211 168 L195 184 L179 168 Z" fill="var(--net)"/>
-          <text class="svg-t" x="195" y="212" text-anchor="middle">the question</text>
-
-          <text class="svg-lbl" x="540" y="62">HOW THE COMPUTER DOES IT</text>
-          <text class="svg-s" x="540" y="92">The question is turned into a dot</text>
-          <text class="svg-s" x="540" y="112">on the same map as the notes.</text>
-          <text class="svg-s" x="540" y="144">The nearest notes are the ones</text>
-          <text class="svg-s" x="540" y="164">most likely to hold the answer.</text>
-          <text class="svg-s" x="540" y="196">Notes too far away are ignored,</text>
-          <text class="svg-s" x="540" y="216">even if they are the best of a bad lot.</text>
-
-          <rect class="svg-box-local" x="540" y="244" width="270" height="32" rx="5"/>
-          <text class="svg-t" x="554" y="265">1 · engine guide, page 2</text>
-
-          <rect class="svg-box-local" x="540" y="284" width="270" height="32" rx="5"/>
-          <text class="svg-t" x="554" y="305">2 · engine guide, page 1</text>
-
-          <rect class="svg-box-local" x="540" y="324" width="270" height="32" rx="5"/>
-          <text class="svg-t" x="554" y="345">3 · engine guide, page 3</text>
+          <text class="svg-lbl" x="8" y="226">INSIDE rag.retrieve()</text>
+          <text class="svg-s" x="8" y="252">1 · embed_query() turns the question into 384 numbers, with the same model used at upload.</text>
+          <text class="svg-s" x="8" y="274">2 · ChromaDB compares it to every stored vector and returns the closest top_k = 4.</text>
+          <text class="svg-s" x="8" y="296">3 · Anything scoring below min_score = 0.35 is dropped before the prompt is built.</text>
         </svg>
       </div>
       <figcaption>
-        <b>It worked on our own test.</b> We asked “How many vacation days do I get?” and it found the
-        handbook passage that says “24 days of paid annual leave” — a sentence with none of the words
-        we typed.
+        <b>Measured on our build.</b> “How many vacation days do I get?” scored <code>0.59</code> against a
+        passage reading “24 days of paid annual leave” — no shared keywords. That is meaning-based search
+        doing its job.
       </figcaption>
     </figure>
 
-    <ul class="words">
-      <li>position on the map = <b>embedding</b> (a list of 384 numbers)</li>
-      <li>the pile of notes = <b>vector database</b></li>
-      <li>how close = <b>similarity score</b>, 0 to 1</li>
-    </ul>
+    <div class="table-wrap">
+      <table>
+        <caption>The numbers in app/config.py</caption>
+        <thead><tr><th>Setting</th><th>Value</th><th>What it controls</th></tr></thead>
+        <tbody>
+          <tr><td><code>chunk_words</code></td><td>200</td><td>How big each slice of the document is</td></tr>
+          <tr><td><code>chunk_overlap_words</code></td><td>40</td><td>How much each chunk repeats the previous one</td></tr>
+          <tr><td><code>top_k</code></td><td>4</td><td>How many chunks go into the prompt</td></tr>
+          <tr><td><code>min_score</code></td><td>0.35</td><td>How close a match must be to count at all</td></tr>
+          <tr><td><code>embedding_model</code></td><td><code>bge-small-en-v1.5</code></td><td>Makes the 384 numbers. Change it and everything must be re-uploaded</td></tr>
+          <tr><td><code>deepseek_model</code></td><td><code>deepseek-chat</code></td><td>Writes the final answer</td></tr>
+        </tbody>
+      </table>
+    </div>
   </section>
 
   <!-- ===== 4 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">04</span>
-      <h2>Step 3 — hand the notes and the question to the AI</h2>
+      <h2>The prompt, and where citations come from</h2>
       <span class="mins">5 min</span>
     </div>
     <p class="lede">
-      We send the AI one message with three things in it: <strong>a rule, the notes we found, and the
-      question</strong>. The rule is the important part — it tells the AI to use only these notes, and to
-      say “I don't know” if the answer is not there.
+      <code>llm.py</code> builds one message: a system prompt with the rules, the retrieved chunks
+      numbered <code>[1]</code>…<code>[4]</code>, then the question. The model is told to answer only
+      from those passages and to cite them by number.
     </p>
 
     <figure>
       <div class="scroller">
-        <svg viewBox="0 0 840 326" role="img" aria-label="The message sent to the AI contains a rule to use only the given notes, the numbered notes themselves, and the question. The AI replies with an answer whose bracket numbers match the note numbers.">
+        <svg viewBox="0 0 840 318" role="img" aria-label="The prompt has three parts: the system rules, the numbered chunks with their source and page, and the question. DeepSeek returns an answer containing bracket numbers, which the API turns into a sources array for the UI.">
           <defs>
             <marker id="m4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
             </marker>
           </defs>
 
-          <text class="svg-m" x="30" y="22" letter-spacing="0.12em">WHAT WE SEND</text>
-          <rect x="30" y="34" width="360" height="280" rx="8" fill="var(--surface-2)" stroke="var(--line)"/>
+          <text class="svg-lbl" x="30" y="22">WHAT llm.py SENDS</text>
+          <rect x="30" y="34" width="370" height="266" rx="8" fill="var(--surface-2)" stroke="var(--line)"/>
 
-          <rect class="svg-box" x="46" y="50" width="328" height="62" rx="5"/>
-          <text class="svg-lbl" x="60" y="70">THE RULE</text>
-          <text class="svg-s" x="60" y="90">Use only the notes below. If they</text>
-          <text class="svg-s" x="60" y="106">do not answer it, say so.</text>
+          <rect class="svg-box" x="46" y="50" width="338" height="66" rx="5"/>
+          <text class="svg-m" x="60" y="70">system</text>
+          <text class="svg-s" x="60" y="90">Answer using ONLY the passages below.</text>
+          <text class="svg-s" x="60" y="108">If they don't contain it, say so. Cite [n].</text>
 
-          <rect class="svg-box-local" x="46" y="122" width="328" height="52" rx="5"/>
-          <text class="svg-t" x="60" y="144">[1]</text>
-          <text class="svg-s" x="88" y="144">The engine makes 92 kN of thrust.</text>
-          <text class="svg-m" x="88" y="163">engine guide · page 2</text>
+          <rect class="svg-box-local" x="46" y="126" width="338" height="54" rx="5"/>
+          <text class="svg-code" x="60" y="148">[1]</text>
+          <text class="svg-s" x="92" y="148">The Orion engine delivers 92 kN…</text>
+          <text class="svg-m" x="92" y="168">chunk from orion.pdf, page 2</text>
 
-          <rect class="svg-box-local" x="46" y="184" width="328" height="52" rx="5"/>
-          <text class="svg-t" x="60" y="206">[2]</text>
-          <text class="svg-s" x="88" y="206">First flight is November 2027.</text>
-          <text class="svg-m" x="88" y="225">engine guide · page 3</text>
+          <rect class="svg-box-local" x="46" y="190" width="338" height="54" rx="5"/>
+          <text class="svg-code" x="60" y="212">[2]</text>
+          <text class="svg-s" x="92" y="212">First flight is scheduled for Nov 2027…</text>
+          <text class="svg-m" x="92" y="232">chunk from orion.pdf, page 3</text>
 
-          <rect class="svg-box" x="46" y="246" width="328" height="52" rx="5"/>
-          <text class="svg-lbl" x="60" y="266">THE QUESTION</text>
-          <text class="svg-s" x="60" y="286">When is the first flight?</text>
+          <rect class="svg-box" x="46" y="254" width="338" height="34" rx="5"/>
+          <text class="svg-m" x="60" y="276">user</text>
+          <text class="svg-s" x="112" y="276">When is the first flight?</text>
+
+          <g color="var(--net)">
+            <line class="edge-net" x1="406" y1="110" x2="466" y2="110" marker-end="url(#m4)"/>
+          </g>
+          <text class="svg-m" x="436" y="100" text-anchor="middle">HTTPS</text>
+
+          <rect class="svg-box-net" x="472" y="82" width="160" height="56" rx="6"/>
+          <text class="svg-code" x="552" y="108" text-anchor="middle">deepseek-chat</text>
+          <text class="svg-s" x="552" y="126" text-anchor="middle">api.deepseek.com</text>
 
           <g color="var(--line-strong)">
-            <line class="edge" x1="396" y1="120" x2="464" y2="120" marker-end="url(#m4)"/>
-          </g>
-          <text class="svg-m" x="430" y="110" text-anchor="middle">send</text>
-
-          <rect class="svg-box-net" x="470" y="92" width="150" height="56" rx="6"/>
-          <text class="svg-t" x="545" y="126" text-anchor="middle">The AI</text>
-
-          <g color="var(--line-strong)">
-            <line class="edge" x1="626" y1="120" x2="654" y2="120" marker-end="url(#m4)"/>
+            <line class="edge" x1="638" y1="110" x2="666" y2="110" marker-end="url(#m4)"/>
           </g>
 
-          <rect class="svg-box-local" x="660" y="92" width="150" height="56" rx="6"/>
-          <text class="svg-t" x="735" y="118" text-anchor="middle">Answer</text>
-          <text class="svg-s" x="735" y="136" text-anchor="middle">with [2] on it</text>
+          <rect class="svg-box-local" x="672" y="82" width="150" height="56" rx="6"/>
+          <text class="svg-t" x="747" y="108" text-anchor="middle">answer</text>
+          <text class="svg-s" x="747" y="126" text-anchor="middle">“…Nov 2027 [2]”</text>
 
-          <text class="svg-lbl" x="470" y="192">WHY THE SOURCE IS TRUSTWORTHY</text>
-          <text class="svg-s" x="470" y="220">The [2] in the answer is the same</text>
-          <text class="svg-s" x="470" y="240">[2] we handed over. So the app</text>
-          <text class="svg-s" x="470" y="260">can show “engine guide, page 3”</text>
-          <text class="svg-s" x="470" y="280">under the answer — and you can</text>
-          <text class="svg-s" x="470" y="300">open that page and check it.</text>
+          <text class="svg-lbl" x="472" y="178">HOW THE CHIPS APPEAR</text>
+          <text class="svg-s" x="472" y="204">chat.py returns the chunks it used</text>
+          <text class="svg-s" x="472" y="226">as a sources array, each with its</text>
+          <text class="svg-s" x="472" y="248">file name, page and score.</text>
+          <text class="svg-s" x="472" y="280">MessageList.jsx renders those as</text>
+          <text class="svg-s" x="472" y="302">the chips under the bubble.</text>
         </svg>
       </div>
       <figcaption>
-        <b>We tested the rule.</b> With only the staff handbook loaded, we asked for the capital of
-        Brazil. Instead of answering from memory, it said the notes do not cover it. That refusal is the
-        feature.
+        <b>The refusal is tested.</b> With only the handbook indexed we asked for the capital of Brazil;
+        the reply said the passages do not cover it instead of answering from training. That behaviour comes
+        from the system prompt, not from luck.
       </figcaption>
     </figure>
 
-    <div class="grid-2">
-      <div class="card">
-        <h3>Two modes in our app</h3>
-        <p>
-          <b>LLM</b> — the closed-book exam, for general questions.
-          <b>LLM + RAG</b> — the open-book exam, for questions about our documents.
-          The dropdown in the corner switches between them.
-        </p>
-      </div>
-      <div class="card warn">
-        <h3>When it still fails</h3>
-        <ul>
-          <li>The answer is in no document — nothing to find</li>
-          <li>The document is a scan with no real text in it</li>
-          <li>The question is vague, so the wrong notes come back</li>
-        </ul>
-      </div>
-    </div>
+    <h3 class="sub">The real response, copied from a live run</h3>
+<pre><code>{ <span class="k">"answer"</span>: <span class="v">"You get 24 days of paid annual leave per calendar year,
+              and unused leave can be carried over up to 5 days [1]."</span>,
+  <span class="k">"sources"</span>: [ { <span class="k">"label"</span>: <span class="v">"company-handbook.md"</span>,
+                 <span class="k">"page"</span>:  <span class="v">null</span>,
+                 <span class="k">"score"</span>: <span class="v">0.568</span> } ] }</code></pre>
   </section>
 
   <!-- ===== 5 ===== -->
   <section>
     <div class="sec-head">
       <span class="idx">05</span>
-      <h2>Is our stuff safe?</h2>
+      <h2>What actually leaves the machine</h2>
       <span class="mins">6 min</span>
     </div>
     <p class="lede">
-      The question everyone asks: <strong>does the AI now have our documents?</strong> No. Nothing about the
-      AI changes; it learns nothing from us. Each question is like handing a stranger a photocopy of four
-      notes, getting an answer back, and the stranger forgetting immediately.
-    </p>
-    <p class="lede">
-      But the honest part: <strong>those four notes really are sent over the internet</strong> to the AI
-      company each time. Not the whole document — but the passages that matched.
+      Nothing about DeepSeek changes when we use it: our documents are not added to the model, and it
+      keeps no memory between requests. What is true is that <b>the text of the retrieved chunks is sent
+      to DeepSeek with every RAG question</b> — roughly 800 words, over HTTPS.
     </p>
 
     <figure>
       <div class="scroller">
-        <svg viewBox="0 0 840 330" role="img" aria-label="Each question sends the question and four notes over the internet to the AI service, which sends an answer back. Everything else, including all documents, the unused notes and the secret key, stays on your computer.">
+        <svg viewBox="0 0 840 326" role="img" aria-label="Per question, the HTTPS request body contains the system prompt, the question and four chunk texts, and the answer comes back. Everything else stays local: the uploaded files, ChromaDB, the embedding model and the API key.">
           <defs>
             <marker id="m5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
               <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
             </marker>
           </defs>
 
-          <text class="svg-m" x="30" y="20" letter-spacing="0.12em">EVERY TIME SOMEONE ASKS</text>
+          <text class="svg-m" x="30" y="20" letter-spacing="0.12em">SENT WITH EVERY llm_rag QUESTION</text>
 
-          <rect class="svg-box" x="30" y="34" width="215" height="62" rx="6"/>
-          <text class="svg-t" x="137" y="60" text-anchor="middle">The question</text>
-          <text class="svg-s" x="137" y="80" text-anchor="middle">+ the 4 notes we found</text>
+          <rect class="svg-box" x="30" y="32" width="230" height="64" rx="6"/>
+          <text class="svg-t" x="145" y="58" text-anchor="middle">question + 4 chunks</text>
+          <text class="svg-s" x="145" y="80" text-anchor="middle">≈ 800 words of our text</text>
 
-          <rect class="svg-box-net" x="375" y="34" width="165" height="62" rx="6"/>
-          <text class="svg-t" x="457" y="60" text-anchor="middle">The AI service</text>
-          <text class="svg-s" x="457" y="80" text-anchor="middle">someone else's computer</text>
+          <rect class="svg-box-net" x="380" y="32" width="165" height="64" rx="6"/>
+          <text class="svg-code" x="462" y="58" text-anchor="middle">api.deepseek</text>
+          <text class="svg-s" x="462" y="80" text-anchor="middle">someone else's server</text>
 
-          <rect class="svg-box" x="665" y="34" width="145" height="62" rx="6"/>
-          <text class="svg-t" x="737" y="70" text-anchor="middle">The answer</text>
+          <rect class="svg-box" x="665" y="32" width="145" height="64" rx="6"/>
+          <text class="svg-t" x="737" y="70" text-anchor="middle">answer text</text>
 
           <g color="var(--net)">
-            <line class="edge-net" x1="251" y1="65" x2="369" y2="65" marker-end="url(#m5)"/>
-            <line class="edge-net" x1="546" y1="65" x2="659" y2="65" marker-end="url(#m5)"/>
+            <line class="edge-net" x1="266" y1="64" x2="374" y2="64" marker-end="url(#m5)"/>
+            <line class="edge-net" x1="551" y1="64" x2="659" y2="64" marker-end="url(#m5)"/>
           </g>
-          <text class="svg-m" x="310" y="55" text-anchor="middle">over the internet</text>
-          <text class="svg-m" x="602" y="55" text-anchor="middle">comes back</text>
+          <text class="svg-m" x="320" y="54" text-anchor="middle">HTTPS POST</text>
+          <text class="svg-m" x="605" y="54" text-anchor="middle">response</text>
 
-          <line x1="30" y1="128" x2="810" y2="128" stroke="var(--line)" stroke-width="1"/>
+          <line x1="30" y1="126" x2="810" y2="126" stroke="var(--line)" stroke-width="1"/>
 
-          <text class="svg-lbl" x="30" y="156">STAYS ON OUR COMPUTER</text>
-          <text class="svg-s" x="30" y="186">every document anyone uploaded</text>
-          <text class="svg-s" x="30" y="210">all the notes that did not match</text>
-          <text class="svg-s" x="30" y="234">the meaning map itself</text>
-          <text class="svg-s" x="30" y="258">our secret key</text>
+          <text class="svg-lbl" x="30" y="154">NEVER LEAVES THE MACHINE</text>
+          <text class="svg-s" x="30" y="182">the uploaded files themselves</text>
+          <text class="svg-s" x="30" y="206">every chunk that did not match</text>
+          <text class="svg-s" x="30" y="230">backend/data/chroma, the index</text>
+          <text class="svg-s" x="30" y="254">the embedding model, which is local</text>
+          <text class="svg-s" x="30" y="278">DEEPSEEK_API_KEY in backend/.env</text>
 
-          <line x1="420" y1="140" x2="420" y2="270" stroke="var(--line)" stroke-width="1"/>
+          <line x1="420" y1="140" x2="420" y2="290" stroke="var(--line)" stroke-width="1"/>
 
-          <text class="svg-lbl-net" x="450" y="156">LEAVES OUR COMPUTER</text>
-          <text class="svg-s" x="450" y="186">the question someone typed</text>
-          <text class="svg-s" x="450" y="210">the 4 notes that matched it</text>
-          <text class="svg-s" x="450" y="234">about 800 words in total</text>
-          <text class="svg-s" x="450" y="258">nothing else</text>
+          <text class="svg-lbl-net" x="450" y="154">IN THE REQUEST BODY</text>
+          <text class="svg-s" x="450" y="182">the system prompt</text>
+          <text class="svg-s" x="450" y="206">the question as typed</text>
+          <text class="svg-s" x="450" y="230">the text of the 4 matched chunks</text>
+          <text class="svg-s" x="450" y="254">nothing else — no file, no index</text>
 
-          <line x1="30" y1="286" x2="810" y2="286" stroke="var(--line)" stroke-width="1"/>
-          <text class="svg-s" x="30" y="312">The AI keeps no memory of it. Ask again tomorrow and it starts from nothing.</text>
+          <line x1="30" y1="298" x2="810" y2="298" stroke="var(--line)" stroke-width="1"/>
+          <text class="svg-s" x="30" y="320">Each request is independent. The model carries nothing from one question to the next.</text>
         </svg>
       </div>
       <figcaption>
-        <b>Stateless is not the same as private.</b> “The AI does not learn from it” and “the passage was
-        sent to another company” are both true at the same time. Deleting a document stops future sends;
-        it cannot un-send what already went.
+        <b>Two things are true at once.</b> The model does not learn from our data, and the passage was
+        still transmitted to another company. Deleting a document stops future sends; it cannot recall
+        what was already sent.
       </figcaption>
     </figure>
 
     <ul class="checks">
       <li class="ok">
         <span class="tag">Good</span>
-        <span><b>Our documents are never uploaded anywhere.</b> The meaning map is built on our own
-        machine by a small model that needs no account and no internet.</span>
+        <span><b>Embedding runs locally.</b> <code>fastembed</code> computes the 384 numbers on our machine,
+        so uploading and indexing sends nothing anywhere.</span>
       </li>
       <li class="ok">
         <span class="tag">Good</span>
-        <span><b>The secret key stays on the server</b>, in a file that git ignores. If it lived in the
-        website code, every visitor could read it and spend our money.</span>
+        <span><b>The key is server-side only</b>, in <code>backend/.env</code>, which git ignores. A key in
+        frontend code is visible to every visitor in devtools.</span>
       </li>
       <li>
         <span class="tag">Decide</span>
-        <span><b>Read the AI company's terms before loading anything confidential.</b> Assume they can log
-        what we send. If that is not acceptable for a document, do not index that document.</span>
+        <span><b>Check DeepSeek's retention and training terms</b> before indexing anything confidential,
+        and assume requests can be logged. If that is not acceptable for a document, don't index it.</span>
       </li>
       <li>
         <span class="tag">To do</span>
-        <span><b>There is no login yet.</b> Anyone who can reach the server can upload, read and delete
-        every document. This must be fixed before it leaves a laptop.</span>
+        <span><b>There is no auth on the API.</b> Anyone who reaches <code>:8000</code> can upload, list,
+        delete and query every document. Fix before this leaves localhost.</span>
       </li>
       <li>
         <span class="tag">To do</span>
-        <span><b>An uploaded file can try to trick the AI.</b> A document can literally contain “ignore
-        your instructions”. Never let an answer trigger an action by itself; treat it as text.</span>
+        <span><b>Chunks are untrusted input.</b> An uploaded file can contain “ignore previous
+        instructions”. Never let an answer trigger an action on its own.</span>
       </li>
       <li class="ok">
         <span class="tag">Option</span>
-        <span><b>We can make it fully private.</b> Swap the AI service for one running on our own machine
-        and nothing leaves at all. One file changes; the rest of the app does not notice.</span>
+        <span><b>Fully local is one file away.</b> Point <code>llm.py</code> at a locally hosted model and
+        nothing leaves at all — the rest of the pipeline is unchanged.</span>
       </li>
     </ul>
 
-    <div class="pull">
-      <p class="q">If someone asks it in the meeting: “so our data is inside the AI now?”</p>
-      <p class="a">
-        No. The AI is the same for every customer and does not change when we use it. What we do send,
-        each time someone asks, is the question and about four paragraphs — the same as pasting an
-        excerpt into a chat window. The thing to think about is sending and logging, not training.
-      </p>
-    </div>
-  </section>
-
-  <!-- ===== 6 ===== -->
-  <section>
-    <div class="sec-head">
-      <span class="idx">06</span>
-      <h2>What we built it with</h2>
-      <span class="mins">4 min</span>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <caption>Each tool, and the job it does in plain words</caption>
-        <thead>
-          <tr><th>Tool</th><th>Its job here</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>React</td><td>The chat screen people actually use</td></tr>
-          <tr><td>FastAPI</td><td>The server that takes the question and runs the steps</td></tr>
-          <tr><td>pypdf · python-docx</td><td>Pulls the words out of PDF and Word files, page by page</td></tr>
-          <tr><td>fastembed</td><td>Puts each note on the meaning map — on our machine, no account</td></tr>
-          <tr><td>ChromaDB</td><td>Keeps the notes and finds the closest ones</td></tr>
-          <tr><td>DeepSeek</td><td>The AI that writes the final answer</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <caption>Knobs we can turn if answers are poor</caption>
-        <thead>
-          <tr><th>Knob</th><th>Now</th><th>Turn it when</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Note size</td><td>200 words</td><td>Bigger for flowing text, smaller for tables and specs</td></tr>
-          <tr><td>Shared words</td><td>40</td><td>Raise it if answers stop mid-fact</td></tr>
-          <tr><td>Notes per question</td><td>4</td><td>Raise for broad questions; each one costs money</td></tr>
-          <tr><td>Closeness needed</td><td>0.35</td><td>Raise it when unrelated sources show up</td></tr>
-        </tbody>
-      </table>
-    </div>
-
     <div class="grid-2">
       <div class="card">
-        <h3>Try it in the session</h3>
+        <h3>Try it live</h3>
         <p>
-          Upload a document from the Docs button, ask something it covers, then ask something it does not.
-          The second answer should be an honest “not in your documents”.
+          Upload a document in the Docs panel, ask something it covers, then ask something it does not.
+          The second answer should say the documents don't cover it — that is the system prompt working.
         </p>
       </div>
-      <div class="card">
-        <h3>Next on the list</h3>
+      <div class="card warn">
+        <h3>When answers are poor</h3>
         <ul>
-          <li>Answers that stream in word by word</li>
-          <li>Follow-up questions that remember the last one</li>
-          <li>A login, before this leaves a laptop</li>
+          <li>Nothing relevant indexed — check the Docs panel</li>
+          <li>Scanned PDF with no text layer — extraction returns nothing</li>
+          <li>Wrong chunks retrieved — raise <code>top_k</code> or lower <code>min_score</code></li>
         </ul>
       </div>
     </div>
   </section>
 
   <footer>
-    <span>RAG session · 30 minutes · 5 pictures</span>
-    <span>Every example here was run on our own build</span>
+    <span>RAG session · 30 minutes · 5 diagrams</span>
+    <span>Every value and response on this page came from a live run of this repo</span>
   </footer>
 
 </div>
